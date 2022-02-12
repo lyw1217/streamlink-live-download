@@ -3,8 +3,8 @@
 STREAMLINK="./venv/bin/streamlink"
 TARGET="target_url.txt"
 INTERVAL=30
-OUTPUT="./recordings/{author}/{id}-{time:%Y%m%d%H%M%S}.ts"
-OPTIONS="--twitch-disable-hosting --twitch-disable-ads"
+OUTPUT="./recordings/{author}/[{author}]{time:%Y-%m-%d}_{title}.ts"
+OPTIONS="--force --twitch-disable-hosting --twitch-disable-ads"
 QUALITY="best"
 
 stream() {
