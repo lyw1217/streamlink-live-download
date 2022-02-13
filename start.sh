@@ -12,7 +12,11 @@ if [ -n "$pids" ]; then
 	echo ${pids[@]}
 	exit 0
 fi
-/usr/bin/nohup /home/leeyw/Documents/github/streamlink-live-download/record.sh $CMD >> nohup.log &
+
+if [ ! -d "./logs" ] ; then
+ mkdir ./logs
+fi
+/usr/bin/nohup /home/leeyw/Documents/github/streamlink-live-download/record.sh $CMD >> ./logs/nohup.log &
 
 dot="...."
 for i in 3 2 1
