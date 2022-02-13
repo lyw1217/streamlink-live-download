@@ -45,7 +45,9 @@
         3853
         done!
 
-2.  ### nohup.log 로그 확인
+2.  ### 로그 확인
+    - 스크립트 실행 로그 : `./logs/nohup.log`
+    - streamlink 실행 로그 : `./logs/streamlink.log`
 3.  ### 영상 저장 확인
-    - 영상 저장 경로 : ./recordings/{author}
-    - 영상 이름 규칙 : {id}-{time:%Y%m%d%H%M%S}.ts
+    - 영상 저장 경로 : `./recordings/{author}`
+    - 영상 이름 규칙 : `[{author}]{time:%Y-%m-%d-%H%M}_{title}_{id}.ts`
