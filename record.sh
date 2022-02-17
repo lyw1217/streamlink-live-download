@@ -3,16 +3,11 @@
 ROOT_DIR="${HOME}/Documents/github/streamlink-live-download"
 STREAMLINK="${ROOT_DIR}/venv/bin/streamlink"
 TARGET="target_url.txt"
-INTERVAL=30
+INTERVAL=20
 OUTPUT="${ROOT_DIR}/recordings/{author}/[{author}]{time:%Y-%m-%d-%H%M}_{title}_{id}.ts"
-OPTIONS="--locale ko_KR --force --twitch-disable-hosting --twitch-disable-ads"
-LOG_OPTIONS="--loglevel info --logfile ${ROOT_DIR}/logs/streamlink.log"
+OPTIONS="--locale ko_KR --force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
+LOG_OPTIONS="--loglevel debug --logfile ${ROOT_DIR}/logs/streamlink"
 QUALITY="best"
-
-stream() {
-	$STREAMLINK --output "${OUTPUT}" $OPTIONS $LOG_OPTIONS $1 $QUALITY
-	#wait
-}
 
 main() {
 	echo ""
@@ -36,7 +31,8 @@ main() {
 				echo "$streamer	is streaming! (pid:$stream_pid)"
 				continue
 			fi
-			stream $url $i &
+			$STREAMLINK --output "${OUTPUT}" $OPTIONS $LOG_OPTIONS_$url.log $url $QUALITY &
+			sleep 2
 			((i++))
 		done < $TARGET
 
