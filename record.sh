@@ -6,7 +6,7 @@ TARGET="target_url.txt"
 INTERVAL=20
 OUTPUT="${ROOT_DIR}/recordings/{author}/[{author}]{time:%Y-%m-%d-%H%M}_{title}_{id}.ts"
 OPTIONS="--locale ko_KR --force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
-LOG_OPTIONS="--loglevel debug --logfile ${ROOT_DIR}/logs/streamlink"
+LOG_OPTIONS="--loglevel trace --logfile ${ROOT_DIR}/logs/streamlink"
 QUALITY="best"
 
 main() {
@@ -31,7 +31,7 @@ main() {
 				echo "$streamer	is streaming! (pid:$stream_pid)"
 				continue
 			fi
-			$STREAMLINK --output "${OUTPUT}" $OPTIONS $LOG_OPTIONS_$url.log $url $QUALITY &
+			${STREAMLINK} --output "${OUTPUT}" ${OPTIONS} ${LOG_OPTIONS}_${streamer}.log ${url} ${QUALITY} &
 			sleep 2
 			((i++))
 		done < $TARGET
