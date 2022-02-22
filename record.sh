@@ -3,12 +3,15 @@
 ROOT_DIR="${HOME}/Documents/github/streamlink-live-download"
 STREAMLINK="${ROOT_DIR}/venv/bin/streamlink"
 TARGET="${ROOT_DIR}/target_url.txt"
-INTERVAL=5
-OUTPUT="${ROOT_DIR}/recordings/{author}/[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts"
+INTERVAL=1
+OUTPUT="${ROOT_DIR}/recordings/[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts"
 OPTIONS="--locale ko_KR --force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
 LOG_FILE="${ROOT_DIR}/logs/streamlink"
 LOG_OPTIONS="--loglevel info --logfile ${LOG_FILE}"
 QUALITY="best"
+
+export LC_ALL="ko_KR.UTF-8" 
+export LANG="ko_KR.UTF-8" 
 
 main() {
 	echo ""

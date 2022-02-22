@@ -2,6 +2,9 @@
 
 CMD="streamlink"
 
+export LC_ALL="ko_KR.UTF-8" 
+export LANG="ko_KR.UTF-8" 
+
 echo "start streamlink"
 
 pids=$(pgrep -f ${CMD})
