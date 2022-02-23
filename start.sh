@@ -17,8 +17,9 @@ if [ -n "$pids" ]; then
 fi
 
 if [ ! -d "./logs" ] ; then
- mkdir ./logs
+ mkdir -p ./logs
 fi
+
 /usr/bin/nohup /home/leeyw/Documents/github/streamlink-live-download/record.sh $CMD >> ./logs/nohup.log &
 
 dot="...."
