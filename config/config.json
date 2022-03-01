@@ -1,0 +1,11 @@
+{
+    "INTERVAL" : 1,
+    "QUALITY" : "best",
+    "OUTPUT_DIR" : "/home/leeyw/mnt/Twitch/recordings",
+    "FILE_RULE" : "[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts",
+    "TARGET_URL" : "/home/leeyw/Documents/github/streamlink-live-download/target_url_tmp.txt",
+    "STREAMLINK_CMD" : "/home/leeyw/Documents/github/streamlink-live-download/venv/bin/streamlink",
+    "STREAMLINK_OPTIONS" : "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
+    "STREAMLINK_LOG_OPTIONS" : "--loglevel info",
+    "STREAMLINK_LOG_PATH" : "/home/leeyw/Documents/github/streamlink-live-download/logs/streamlink"
+}
