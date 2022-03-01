@@ -7,28 +7,40 @@ from getconfig import *
 
 streamers = dict()
 
+
 def create_dir(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
-        root_logger.critical("Error : Creating directory " +  directory)
+        root_logger.critical("Error : Creating directory " + directory)
 
-def start_streamlink(streamer, url) :
+
+def start_streamlink(streamer, url):
     root_logger.critical(f"START STREAMING > {streamer}")
-    
-    opt = f'--output "{OUTPUT_DIR}/{FILE_RULE}"' + ' '
-    opt += f'{STREAMLINK_OPTIONS}' + ' '
-    opt += f'{STREAMLINK_LOG_OPTIONS}' + ' '
-    opt += f'--logfile {STREAMLINK_LOG_PATH}_{streamer}.log' + ' '
-    opt += f'{url}' + ' '
-    opt += f'{QUALITY}'
 
-    result = sp.run(
-        [STREAMLINK_CMD, opt]
-        #, capture_output=True
-        #, text=True
-        , check=True
+    args = list()
+    opts = list()
+
+    opts.append('--output')
+    opts.append(f'{OUTPUT_DIR}/{FILE_RULE}')
+    opts += f'{STREAMLINK_OPTIONS}'.split(' ')
+    opts.append('--loglevel')
+    opts.append(f'{STREAMLINK_LOG_OPTIONS}')
+    opts.append('--logfile')
+    opts.append(f'{STREAMLINK_LOG_PATH}_{streamer}.log')
+    opts.append(f'{url}')
+    opts.append(f'{QUALITY}')
+
+    args.append(STREAMLINK_CMD)
+    args += opts
+
+    print(args)
+
+    result = sp.check_call(
+        args
+        # capture_output=True, text=True,
+        # check=True
     )
 
     print(result)
@@ -39,31 +51,31 @@ def start_streamlink(streamer, url) :
     del streamers[streamer]
     return
 
-def check_stream() :
+
+def check_stream():
     executor = cf.ThreadPoolExecutor(max_workers=10)
 
-    while True :
+    while True:
         eof = True
-        with open(TARGET_URL, "r") as f :
-            while eof :
+        with open(TARGET_URL, "r") as f:
+            while eof:
                 url = f.readline().strip()
                 if not url:
                     eof = False
                     continue
-                
+
                 # split url (https://www.twitch.tv/)
                 name = url[22:].strip()
-                if name in streamers :
-                    root_logger.critical(f"{name} is STREAMING!") 
-                else :
+                if name not in streamers:
                     streamers[name] = True
                     root_logger.critical(f"check streaming... > '{name}'")
                     executor.submit(start_streamlink, streamer=name, url=url)
-                
+
                 time.sleep(INTERVAL)
     return
 
-if __name__ == '__main__' :
+
+if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
