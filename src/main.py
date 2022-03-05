@@ -17,7 +17,7 @@ def create_dir(directory):
 
 
 def start_streamlink(streamer, url):
-    root_logger.critical(f"START STREAMING > {streamer}")
+    #parent_logger.info(f"START STREAMING > {streamer}")
 
     args = list()
     opts = list()
@@ -37,16 +37,13 @@ def start_streamlink(streamer, url):
 
     print(args)
 
-    result = sp.check_call(
+    sp.call(
         args
         # capture_output=True, text=True,
         # check=True
     )
 
-    print(result)
-    root_logger.critical(result)
-
-    root_logger.critical(f"END STREAMING   > {streamer}")
+    #parent_logger.info(f"END STREAMING   > {streamer}")
     # 스트리밍 종료 시 딕셔너리에서 삭제
     del streamers[streamer]
     return
@@ -66,12 +63,15 @@ def check_stream():
 
                 # split url (https://www.twitch.tv/)
                 name = url[22:].strip()
-                if name not in streamers:
+                if name in streamers:
+                    #parent_logger.info(f"{name} is streaming!!")
+                    time.sleep(INTERVAL)
+                else:
                     streamers[name] = True
                     root_logger.critical(f"check streaming... > '{name}'")
                     executor.submit(start_streamlink, streamer=name, url=url)
+                    time.sleep(INTERVAL)
 
-                time.sleep(INTERVAL)
     return
 
 

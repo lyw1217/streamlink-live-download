@@ -6,6 +6,6 @@
   "TARGET_URL": "/home/leeyw/Documents/github/streamlink-live-download/target_url.txt",
   "STREAMLINK_CMD": "/home/leeyw/Documents/github/streamlink-live-download/venv/bin/streamlink",
   "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
-  "STREAMLINK_LOG_OPTIONS": "debug",
+  "STREAMLINK_LOG_OPTIONS": "info",
   "STREAMLINK_LOG_PATH": "/home/leeyw/Documents/github/streamlink-live-download/logs/streamlink"
 }
