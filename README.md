@@ -46,13 +46,16 @@
         done!
 
 2.  ### 로그 확인
+
     - 스크립트 실행 로그 : `./logs/nohup.log`
     - streamlink 실행 로그 : `./logs/streamlink.log`
 
 3.  ### 영상 저장 확인
-    - 영상 저장 경로 : 
-        ```
-                MOUNT_DIR="${HOME}/mnt"
-                OUTPUT_DIR="${MOUNT_DIR}/Twitch/recordings"/recordings/{author}`
-        ```
+    - 영상 저장 경로 :
+      ```
+              MOUNT_DIR="${HOME}/mnt"
+              OUTPUT_DIR="${MOUNT_DIR}/Twitch/recordings"/recordings/{author}`
+      ```
     - 영상 이름 규칙 : `[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts`
+      - 스트리머가 방송 시작한 직후 title을 입력하기 때문인지 아니면 다른 이유인지 트위치 어플에서도 방송 시작과 동시에는 title이 뜨지 않음
+      - 그런데 author도 못가져오는 이유는 모르겠음.
