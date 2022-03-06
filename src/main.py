@@ -35,7 +35,7 @@ def start_streamlink(streamer, url):
     args.append(STREAMLINK_CMD)
     args += opts
 
-    print(args)
+    # print(args)
 
     sp.call(
         args
@@ -61,10 +61,11 @@ def check_stream():
                     eof = False
                     continue
 
+                print('streamers = ', streamers)
                 # split url (https://www.twitch.tv/)
                 name = url[22:].strip()
                 if name in streamers:
-                    #parent_logger.info(f"{name} is streaming!!")
+                    parent_logger.info(f"{name} is streaming!!")
                     time.sleep(INTERVAL)
                 else:
                     streamers[name] = True
