@@ -4,9 +4,9 @@ ROOT_DIR="${HOME}/Documents/github/streamlink-live-download"
 STREAMLINK="${ROOT_DIR}/venv/bin/streamlink"
 TARGET="${ROOT_DIR}/target_url.txt"
 
-#OUTPUT_DIR="${ROOT_DIR}/recordings"
-MOUNT_DIR="${HOME}/mnt"
-OUTPUT_DIR="${MOUNT_DIR}/Twitch/recordings"
+OUTPUT_DIR="${ROOT_DIR}/recordings"
+#MOUNT_DIR="${HOME}/mnt"
+#OUTPUT_DIR="${MOUNT_DIR}/Twitch/recordings"
 
 OUTPUT="${OUTPUT_DIR}/[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts"
 OPTIONS="--locale en_US --force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
