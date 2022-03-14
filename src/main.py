@@ -39,8 +39,6 @@ def start_streamlink(streamer, url):
 
     sp.call(
         args
-        # capture_output=True, text=True,
-        # check=True
     )
 
     #parent_logger.info(f"END STREAMING   > {streamer}")
@@ -48,6 +46,48 @@ def start_streamlink(streamer, url):
     del streamers[streamer]
     return
 
+def get_stream_info(streamer, url):
+    title = ''
+    author = ''
+    date = time.strftime('%Y-%m-%d %H%M', time.localtime(time.time()))
+
+    args = list()
+    opts = list()
+
+    opts.append('--json')
+    opts += f'{STREAMLINK_OPTIONS}'.split(' ')
+    opts.append(f'{url}')
+    opts.append(f'{QUALITY}')
+
+    args.append(STREAMLINK_CMD)
+    args += opts
+    pipe = sp.Popen(
+        args
+        , stdout = sp.PIPE
+    )
+    text = pipe.communicate()[0]
+
+    dict = json.loads(text)
+    for key, val in dict.items():
+        if key == 'metadata' :
+            for k, v in val.items():
+                if k == 'title' :
+                    title = v
+                elif k == 'author' :
+                    author = v
+
+    if streamer in streamers :
+        if len(title) > 0 and len(author) > 0 :
+            streamers[streamer] = True 
+            print(f'date = {date}')
+            print(f'title = "{title}"')
+            print(f'author = "{author}"')
+            file_name = f"{OUTPUT_DIR}/[{author}]_{date}_{title}.ts.txt"
+            print(file_name)
+            with open(file_name, 'w') as f :
+                f.write(file_name)
+        
+        
 
 def check_stream():
     executor = cf.ThreadPoolExecutor(max_workers=10)
@@ -66,9 +106,11 @@ def check_stream():
                 name = url[22:].strip()
                 if name in streamers:
                     parent_logger.info(f"{name} is streaming!!")
+                    if streamers.get(name) == False :
+                        get_stream_info(streamer=name, url=url)
                     time.sleep(INTERVAL)
                 else:
-                    streamers[name] = True
+                    streamers[name] = False
                     root_logger.critical(f"check streaming... > '{name}'")
                     executor.submit(start_streamlink, streamer=name, url=url)
                     time.sleep(INTERVAL)
