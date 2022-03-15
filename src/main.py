@@ -71,10 +71,11 @@ def get_stream_info(streamer, url):
     for key, val in dict.items():
         if key == 'metadata' :
             for k, v in val.items():
-                if k == 'title' :
-                    title = v
-                elif k == 'author' :
-                    author = v
+                if v != None :
+                    if k == 'title' :
+                        title = v
+                    elif k == 'author' :
+                        author = v
 
     if streamer in streamers :
         if len(title) > 0 and len(author) > 0 :
