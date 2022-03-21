@@ -49,7 +49,7 @@ def start_streamlink(streamer, url):
 def get_stream_info(streamer, url):
     title = ''
     author = ''
-    date = time.strftime('%Y-%m-%d %H%M', time.localtime(time.time()))
+    date = time.strftime('%Y-%m-%d_%H%M', time.localtime(time.time()))
 
     args = list()
     opts = list()
@@ -83,7 +83,7 @@ def get_stream_info(streamer, url):
             print(f'date = {date}')
             print(f'title = "{title}"')
             print(f'author = "{author}"')
-            file_name = f"{OUTPUT_DIR}/[{author}]_{date}_{title}.ts.txt"
+            file_name = f"{OUTPUT_DIR}/[{author}]_{date}_{title.replace(' ','_')}.ts.txt"
             print(file_name)
             with open(file_name, 'w') as f :
                 f.write(file_name)
