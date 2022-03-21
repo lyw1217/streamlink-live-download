@@ -7,8 +7,8 @@ VIDEO_PATH="/home/leeyw/mnt/Twitch/recordings"
 #for arg in "$@"
 for arg in "$VIDEO_PATH"/*
 do
-	if [ ! -e $arg ]; then
-		echo "File $arg is not exists."
+	if [ ! -e "$arg" ]; then
+		echo "File "$arg" is not exists."
 		continue
 	fi
 	
@@ -19,6 +19,7 @@ do
 	
 	echo $arg
 
-	ffmpeg -i $arg 2>&1 | grep Duration | awk '{print $w}'
+	ffmpeg -i $arg 2>&1 | grep Duration | awk '{print $2}' | tr -d ,
+
 	echo
 done
