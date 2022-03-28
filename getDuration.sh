@@ -22,4 +22,6 @@ do
 	ffmpeg -i $arg 2>&1 | grep Duration | awk '{print $2}' | tr -d ,
 
 	echo
+
+	sleep 5
 done
