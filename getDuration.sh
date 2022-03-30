@@ -23,5 +23,6 @@ do
 
 	echo
 
-	sleep 5
 done
+
+sleep 5

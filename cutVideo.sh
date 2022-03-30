@@ -46,7 +46,7 @@ do
 done
 
 usr_input='n'
-if [ $IS_OVER -eq 0 ]; then 
+if [ $IS_OVER -eq 1 ]; then 
 	read -p "There are more than 12 hours of video. Do you want to cut it? (y,n) " usr_input
 fi
 
