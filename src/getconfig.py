@@ -50,7 +50,7 @@ with open(CONFIG_PATH) as json_file:
     f_send = {}
 
     root_logger.critical('=== CONFIGURATIONS ===')
-    INTERVAL = int(configs['INTERVAL'])
+    INTERVAL = float(configs['INTERVAL'])
     root_logger.critical(f'INTERVAL = {INTERVAL}')
     QUALITY = configs['QUALITY']
     root_logger.critical(f'QUALITY = {QUALITY}')
