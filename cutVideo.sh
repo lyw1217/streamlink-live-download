@@ -8,7 +8,7 @@
 #	exit 0
 #fi
 
-VIDEO_PATH="/home/leeyw/mnt/Twitch/recordings"
+VIDEO_PATH="${HOME}/mnt/Twitch/recordings"
 
 IS_OVER=0
 
