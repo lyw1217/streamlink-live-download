@@ -14,7 +14,7 @@
         },
         "file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/home/leeyw/Documents/github/streamlink-live-download/logs/pystreamlink.log",
+            "filename": "/home/ubuntu/Documents/github/streamlink-live-download/logs/pystreamlink.log",
             "when": "D",
             "backupCount": 10,
             "encoding":"utf-8",
