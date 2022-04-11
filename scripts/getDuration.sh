@@ -13,7 +13,7 @@ do
 	fi
 	
 	fileext=${arg##*.}
-	if [ "$fileext" != "ts" ]; then
+	if [ "$fileext" == "txt" ]; then
 		continue
 	fi
 	
