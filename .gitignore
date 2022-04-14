@@ -196,3 +196,5 @@ cython_debug/
 
 recordings/*
 logs/*
+upload_youtube.py-oauth2.json
+client_secrets.json
