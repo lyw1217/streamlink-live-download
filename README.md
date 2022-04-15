@@ -26,10 +26,10 @@ target 스트리머의 방송 시작 및 종료를 주기적으로 확인하여 
 
 1. ### 스트리머의 url 저장
 
-   다운로드하고 싶은 스트리머의 url을 [target_url.dat](./target_url.txt)에 저장한다.
+   다운로드하고 싶은 스트리머의 url을 [target_url.txt](./target_url.txt)에 저장한다.
 
    ```
-   # ./target_url.txt
+   # cat target_url.txt
 
    https://www.twitch.tv/woowakgood
    https://www.twitch.tv/vo_ine
