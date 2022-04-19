@@ -131,7 +131,7 @@ if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
-    root_logger.critical("                            written by ywlee")
+    root_logger.critical("            mining          written by ywlee")
     root_logger.critical("============================================")
     create_dir(OUTPUT_DIR)
     check_stream()
