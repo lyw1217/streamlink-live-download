@@ -5,7 +5,7 @@ TARGET_URLS=()
 while read url; do
     if [ -z "$url" ]; then continue; fi
     TARGET_URLS+=($url)
-done < /home/ubuntu/Documents/github/streamlink-live-download/target_url.txt
+done < /home/ubuntu/Documents/github/streamlink-live-download/download_url.txt
 
 for arg in "${TARGET_URLS[@]}"
 do
