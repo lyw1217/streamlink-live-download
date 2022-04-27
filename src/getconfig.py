@@ -68,3 +68,7 @@ with open(CONFIG_PATH) as json_file:
     root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
     STREAMLINK_LOG_PATH = configs['STREAMLINK_LOG_PATH']
     root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
+    UPLOAD_YOUTUBE_PY = configs['UPLOAD_YOUTUBE_PY']
+    root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
+    PYTHON_CMD = configs['PYTHON_CMD']
+    root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')

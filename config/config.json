@@ -1,5 +1,5 @@
 {
-  "INTERVAL": 1,
+  "INTERVAL": 2,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/ubuntu/mnt/Twitch/recordings",
   "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts",
@@ -7,5 +7,7 @@
   "STREAMLINK_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/streamlink",
   "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
   "STREAMLINK_LOG_OPTIONS": "info",
-  "STREAMLINK_LOG_PATH": "/home/ubuntu/Documents/github/streamlink-live-download/logs/streamlink"
+  "STREAMLINK_LOG_PATH": "/home/ubuntu/Documents/github/streamlink-live-download/logs/streamlink",
+  "UPLOAD_YOUTUBE_PY": "/home/ubuntu/Documents/github/streamlink-live-download/src/upload_youtube.py",
+  "PYTHON_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/python"
 }
