@@ -92,7 +92,7 @@ def upload_youtube(author, date) :
             
             if match_flag == True :
                 root_logger.critical(f"youtube upload start {author} > file name : '{name}'")
-                '''
+                
                 sp.call([PYTHON_CMD, UPLOAD_YOUTUBE_PY, 
                         '--file',           f'{OUTPUT_DIR}/{name}',
                         '--title',          f'{name}',
@@ -100,7 +100,7 @@ def upload_youtube(author, date) :
                         '--category',       "24",
                         '--privacyStatus',  "private"
                 ])
-                '''
+                
                 time.sleep(10)
                 #root_logger.critical(f"remove {OUTPUT_DIR}/{name}")
                 #os.remove(f"{OUTPUT_DIR}/{name}")
@@ -165,7 +165,7 @@ def check_stream():
             # split url (https://www.twitch.tv/)
             name = url[22:].strip()
             executor.submit(start_streamlink, streamer=name, url=url)
-            time.sleep(2)
+            time.sleep(1)
 
     while True :
         time.sleep(100)
