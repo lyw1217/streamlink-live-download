@@ -91,7 +91,7 @@ def get_stream_info(streamer, url):
             print(f'date = {date}')
             print(f'title = "{title}"')
             print(f'author = "{author}"')
-            file_name = f"{OUTPUT_DIR}/[{author}]_{date}_{title.replace(' ','_')}.ts.txt"
+            file_name = f"{OUTPUT_DIR}/[{author}]_{date}_{title.replace('/','_').replace(' ','_')}.ts.txt"
             print(file_name)
             with open(file_name, 'w') as f:
                 f.write(file_name)
