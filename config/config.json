@@ -1,8 +1,8 @@
 {
-  "INTERVAL": 2,
+  "INTERVAL": 5,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/ubuntu/mnt/Twitch/recordings",
-  "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M}_{title}.ts",
+  "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
   "TARGET_URL": "/home/ubuntu/Documents/github/streamlink-live-download/target_url.txt",
   "STREAMLINK_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/streamlink",
   "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
