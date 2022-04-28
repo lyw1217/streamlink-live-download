@@ -8,6 +8,7 @@ from getconfig import *
 
 executor = cf.ThreadPoolExecutor(max_workers=32)
 
+
 def create_dir(directory):
     try:
         if not os.path.exists(directory):
@@ -17,20 +18,18 @@ def create_dir(directory):
 
 # 채굴 시작
 def start_mining(url):
-    root_logger.critical(f"start mining... > '{url}'") 
+    root_logger.critical(f"start mining... > '{url}'")
     sp.Popen(['google-chrome-stable', url, '--new-window'])
 
 # 채굴 종료
 def stop_mining(author):
-    root_logger.critical(f"stop mining... > '{author}'") 
+    root_logger.critical(f"stop mining... > '{author}'")
     sp.call(['wmctrl', '-c', f'{author} - Twitch'])
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
-    root_logger.critical(f"get streaming information... > '{streamer}'") 
-
-    title = ''
     author = ''
+    title = ''
 
     args = list()
     opts = list()
@@ -58,64 +57,83 @@ def get_stream_info(streamer, url):
             break
 
     if len(title) > 0 and len(author) > 0:
-        root_logger.critical(f"'{streamer}' is streaming!") 
-        return author
-    
-    return ''
+        root_logger.critical(f"'{streamer}' is streaming!")
+        root_logger.critical(f"METADATA : author = '{author}'")
+        root_logger.critical(f"METADATA : title  = '{title}'")
 
-def upload_youtube(author, date) :
-    print(f'upload_youtube author={author}, date={date}')
+    return author, title
+
+
+def upload_youtube(author, title, date):
+    root_logger.critical(f'upload_youtube author={author}, title={title}, date={date}')
+
+    upload_flag = False
 
     file_list = os.listdir(OUTPUT_DIR)
     file_list_ts = [file for file in file_list if file.endswith(".ts")]
 
-    for name in file_list_ts :
-        if author in name :
-            l_plus_date  = [date+datetime.timedelta(seconds=i) for i in range(15)]
-            l_minus_date = [date-datetime.timedelta(seconds=i) for i in range(5)]
+    for name in file_list_ts:
+        if author in name:
+            l_plus_date = [
+                date+datetime.timedelta(seconds=i) for i in range(15)]
+            l_minus_date = [
+                date-datetime.timedelta(seconds=i) for i in range(5)]
 
             # file name format : "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
             file_date = datetime.datetime.strptime(name.split(']')[1][1:18], "%Y-%m-%d-%H%M%S")
 
             match_flag = False
 
-            for d in l_plus_date :
-                if file_date.hour == d.hour and file_date.minute == d.minute and file_date.second == d.second :
+            for d in l_plus_date:
+                if file_date.hour == d.hour and file_date.minute == d.minute and file_date.second == d.second:
                     match_flag = True
                     break
 
-            if match_flag == False :
-                for d in l_minus_date :
-                    if file_date.hour == d.hour and file_date.minute == d.minute and file_date.second == d.second :
+            if match_flag == False:
+                for d in l_minus_date:
+                    if file_date.hour == d.hour and file_date.minute == d.minute and file_date.second == d.second:
                         match_flag = True
                         break
-            
-            if match_flag == True :
-                root_logger.critical(f"youtube upload start {author} > file name : '{name}'")
-                
-                sp.call([PYTHON_CMD, UPLOAD_YOUTUBE_PY, 
-                        '--file',           f'{OUTPUT_DIR}/{name}',
-                        '--title',          f'{name}',
-                        '--description',    f'{name}',
-                        '--category',       "24",
-                        '--privacyStatus',  "private"
-                ])
-                
+
+            if match_flag == True:
+                root_logger.critical(
+                    f"youtube upload start {author} > file name : '{name}'")
+
+                sp.call([PYTHON_CMD, UPLOAD_YOUTUBE_PY,
+                        '--file',            f'{OUTPUT_DIR}/{name}',
+                         '--title',          f'{name}',
+                         '--description',    f'{name}',
+                         '--category',       "24",
+                         '--privacyStatus',  "private"
+                         ])
+                upload_flag = True
                 time.sleep(10)
                 #root_logger.critical(f"remove {OUTPUT_DIR}/{name}")
-                #os.remove(f"{OUTPUT_DIR}/{name}")
+                # os.remove(f"{OUTPUT_DIR}/{name}")
                 break
+
+    if upload_flag != True :
+        root_logger.critical(f'Err. Failed upload_youtube author={author}, title={title}, date={date}, file_list_ts={file_list_ts}')
+
     return
 
+
 def start_streamlink(streamer, url):
-    root_logger.critical(f"init check streaming thread... > '{streamer}'") 
-    
+    root_logger.critical(f"init check streaming thread... > '{streamer}'")
+
     author = ''
+    title = ''
+    i = 0
 
-    while True :
-        author = get_stream_info(streamer, url)
+    while True:
+        if i % 10 == 0 :
+            root_logger.critical(f"{datetime.datetime.now()} get streaming information... > '{streamer}'")
+            i = 0
+        i += 1
 
-        if author != '' :
+        author, title = get_stream_info(streamer, url)
+
+        if author != '' and title != '':
             executor.submit(start_mining, url=url)
             args = list()
             opts = list()
@@ -141,16 +159,18 @@ def start_streamlink(streamer, url):
 
             executor.submit(stop_mining, author=author)
             time.sleep(5)
-            
-            executor.submit(upload_youtube, author=author, date=date)
-            author = ''
-            time.sleep(5)
 
+            executor.submit(upload_youtube, author=author, title=title, date=date)
+            time.sleep(5)
+            i = 0
+
+        author = ''
+        title = ''
         time.sleep(INTERVAL)
 
     return
 
-        
+
 def check_stream():
 
     eof = True
@@ -167,9 +187,9 @@ def check_stream():
             executor.submit(start_streamlink, streamer=name, url=url)
             time.sleep(1)
 
-    while True :
+    while True:
         time.sleep(100)
-    
+
     return
 
 
