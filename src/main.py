@@ -1,3 +1,4 @@
+from asyncio import subprocess
 import subprocess as sp
 import concurrent.futures as cf
 import time
@@ -19,12 +20,17 @@ def create_dir(directory):
 # 채굴 시작
 def start_mining(url):
     root_logger.critical(f"start mining... > '{url}'")
-    sp.Popen(['google-chrome-stable', url, '--new-window'])
+    p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+    out = p.communicate()
+    root_logger.critical(out)
 
 # 채굴 종료
 def stop_mining(author):
     root_logger.critical(f"stop mining... > '{author}'")
-    sp.call(['wmctrl', '-c', f'{author} - Twitch'])
+    # https://purplechip.tistory.com/1
+    p = sp.run(['wmctrl', '-c', f'{author} - Twitch'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+    out = p.communicate()
+    root_logger.critical(out)
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
@@ -98,14 +104,17 @@ def upload_youtube(author, title, date):
             if match_flag == True:
                 root_logger.critical(
                     f"youtube upload start {author} > file name : '{name}'")
-
-                sp.call([PYTHON_CMD, UPLOAD_YOUTUBE_PY,
+                
+                p = sp.Popen([PYTHON_CMD, UPLOAD_YOUTUBE_PY,
                         '--file',            f'{OUTPUT_DIR}/{name}',
                          '--title',          f'{name}',
                          '--description',    f'{name}',
                          '--category',       "24",
                          '--privacyStatus',  "private"
-                         ])
+                         ], 
+                         stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+                out = p.communicate()
+                root_logger.critical(out)
                 upload_flag = True
                 time.sleep(10)
                 #root_logger.critical(f"remove {OUTPUT_DIR}/{name}")
@@ -126,7 +135,7 @@ def start_streamlink(streamer, url):
     i = 0
 
     while True:
-        if i % 10 == 0 :
+        if i % 100 == 0 :
             root_logger.critical(f"{datetime.datetime.now()} get streaming information... > '{streamer}'")
             i = 0
         i += 1
@@ -153,15 +162,13 @@ def start_streamlink(streamer, url):
 
             date = datetime.datetime.now()
 
-            sp.call(
-                args
-            )
+            sp.call(args)
 
             executor.submit(stop_mining, author=author)
             time.sleep(5)
 
             executor.submit(upload_youtube, author=author, title=title, date=date)
-            time.sleep(5)
+            time.sleep(10)
             i = 0
 
         author = ''
