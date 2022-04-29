@@ -9,5 +9,6 @@
   "STREAMLINK_LOG_OPTIONS": "info",
   "STREAMLINK_LOG_PATH": "/home/ubuntu/Documents/github/streamlink-live-download/logs/streamlink",
   "UPLOAD_YOUTUBE_PY": "/home/ubuntu/Documents/github/streamlink-live-download/src/upload_youtube.py",
-  "PYTHON_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/python"
+  "PYTHON_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/python",
+  "SAVED_DIR": "/home/ubuntu/mnt/Twitch/recordings/saved"
 }

@@ -72,3 +72,5 @@ with open(CONFIG_PATH) as json_file:
     root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
     PYTHON_CMD = configs['PYTHON_CMD']
     root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
+    SAVED_DIR = configs['SAVED_DIR']
+    root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')

@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # https://developers.google.com/youtube/v3/guides/uploading_a_video?hl=ko
+# 2to3로 변환
+
 import http.client
 import httplib2
 import os
