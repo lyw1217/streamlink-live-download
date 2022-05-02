@@ -185,6 +185,7 @@ def start_streamlink(streamer, url):
         author, title = get_stream_info(streamer, url)
 
         if author != '' and title != '':
+            time.sleep(1)
             executor.submit(start_mining, url=url)
             args = list()
             opts = list()
@@ -205,7 +206,8 @@ def start_streamlink(streamer, url):
             date = datetime.datetime.now()
 
             sp.call(args)
-
+            
+            time.sleep(1)
             executor.submit(stop_mining, author=author)
             time.sleep(5)
 
@@ -244,7 +246,7 @@ def upload_saved() :
     while True:
         date = datetime.datetime.now()
 
-        if date.hour >= 17 and date.minute >= 10 and date.minute <= 11 and f_once == False :
+        if date.hour == 17 and date.minute >= 10 and date.minute <= 11 and f_once == False :
             root_logger.critical(f"[SAVED] Start Upload youtube Saved Files ... ")
             file_list = os.listdir(SAVED_DIR)
             file_list_ts = [file for file in file_list if file.endswith(".ts")]
@@ -278,7 +280,7 @@ def upload_saved() :
         if date.hour >= 18:
             f_once = False
 
-        time.sleep(5)
+        time.sleep(10)
 
 if __name__ == '__main__':
     root_logger.critical("============================================")
