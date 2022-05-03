@@ -1,5 +1,6 @@
 #!/bin/bash
 VIDEO_PATH="${HOME}/mnt/Twitch/recordings"
+INPUT="/home/ubuntu/Documents/github/streamlink-live-download/download_url.txt"
 TARGET_URLS=()
 PROGRAM="youtube-dl"
 CMD=`command -v ${PROGRAM} 2>/dev/null`
@@ -20,7 +21,7 @@ fi
 while read url; do
     if [ -z "$url" ]; then continue; fi
     TARGET_URLS+=($url)
-done < /home/ubuntu/Documents/github/streamlink-live-download/download_url.txt
+done < $INPUT
 
 for arg in "${TARGET_URLS[@]}"
 do
