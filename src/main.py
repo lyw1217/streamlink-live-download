@@ -1,12 +1,36 @@
+from signal import alarm
 import subprocess as sp
 import concurrent.futures as cf
 import time
 import datetime
 import os
+import smtplib
+from email.message import EmailMessage
 
 from getconfig import *
 
 executor = cf.ThreadPoolExecutor(max_workers=32)
+
+def send_email(subject, content):
+    # 이메일 주소 미설정 시 메일 전송기능 OFF
+    if len(FROM_EMAIL_ADDR) == 0 or len(TO_EMAIL_ADDR) == 0 :
+        return 
+    root_logger.critical(f"Send Email, subject = {subject}, content = {content}")
+    # Create a text/plain message
+    msg = EmailMessage()
+    msg.set_content(content)
+
+    # me == the sender's email address
+    # you == the recipient's email address
+    msg['Subject'] = f"[Pystreamlink] {subject}"
+    msg['From'] = FROM_EMAIL_ADDR
+    msg['To'] = TO_EMAIL_ADDR
+
+    # Send the message via our own SMTP server.
+    s = smtplib.SMTP('localhost')
+    s.send_message(msg)
+    s.quit()
+    root_logger.critical("Send Email Complete")
 
 
 def create_dir(directory):
@@ -15,6 +39,7 @@ def create_dir(directory):
             os.makedirs(directory)
     except OSError:
         root_logger.critical("Error : Creating directory " + directory)
+
 
 # 채굴 시작
 def start_mining(url):
@@ -26,10 +51,10 @@ def start_mining(url):
 # 채굴 종료
 def stop_mining(author):
     root_logger.critical(f"stop mining... > '{author}'")
-    # https://purplechip.tistory.com/1
     p = sp.run(['wmctrl', '-c', f'{author} - Twitch'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
     out = p.communicate()[0]
     root_logger.critical(out)
+
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
@@ -48,6 +73,7 @@ def get_stream_info(streamer, url):
     pipe = sp.Popen(
         args, stdout=sp.PIPE
     )
+    # https://purplechip.tistory.com/1
     text = pipe.communicate()[0]
 
     dict = json.loads(text)
@@ -161,10 +187,12 @@ def upload_youtube(author, title, date):
                         root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
                         root_logger.critical(f"RETRY Replace {OUTPUT_DIR}/{name} to {SAVED_DIR}/{name}")
                         os.replace(f"{OUTPUT_DIR}/{name}", f"{SAVED_DIR}/{name}")
+                        send_email("유튜브 업로드 실패", f"파일명 : '{name}'\n 업로드 실패. 파일을 '{SAVED_DIR}/{name}' 경로로 이동하였습니다.")
                 break
 
     if upload_flag != True :
         root_logger.critical(f'Err. Failed upload_youtube author={author}, title={title}, date={date}, file_list_ts={file_list_ts}')
+        send_email("유튜브 업로드 실패", f"파일명 : {name}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n Streamlink에서 Metadata를 정상적으로 가져오지 못했습니다. 수동으로 업로드해야합니다.")
 
     return
 
@@ -236,7 +264,7 @@ def check_stream():
             # split url (https://www.twitch.tv/)
             name = url[22:].strip()
             executor.submit(start_streamlink, streamer=name, url=url)
-            time.sleep(1)
+            time.sleep(2)
 
     return
 
@@ -272,6 +300,7 @@ def upload_saved() :
                     else :
                         # 재시도 실패 시 로깅
                         root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
+                        send_email("SAVED 유튜브 업로드 실패", f"파일명 : '{name}'\n SAVED에 저장된 파일 업로드 실패.\n Google API의 할당량을 확인하세요.\n 다른 동영상 다운로드를 위해 하드디스크의 여유 공간을 확보하세요.")
                 break
 
             f_once = True
@@ -282,13 +311,57 @@ def upload_saved() :
 
         time.sleep(10)
 
+# https://codechacha.com/ko/python-file-or-dir-size/
+def get_dir_size(path='.'):
+    total = 0
+    with os.scandir(path) as it:
+        for entry in it:
+            if entry.is_file():
+                total += entry.stat().st_size
+            elif entry.is_dir():
+                total += get_dir_size(entry.path)
+    # return unit : gigabytes
+    return total // (1024 * 1024 * 1024)
+
+def get_filesystem_use():
+    pipe = sp.Popen("df -h | grep -v '100%' | grep -v 'Use'| awk '{print $5}'", shell=True, text=True, stdout=sp.PIPE)
+
+    result = pipe.stdout.read().split('\n')[:-1]
+    uses = list()
+    for r in result :
+        r = r.strip()
+        uses.append(int(r[0 : len(r) - 1]))
+    return max(uses)
+
+def check_filesystem() :
+    root_logger.critical("Init check filesystem thread...")
+    alarm_flag = False
+
+    while True :
+        usage = get_filesystem_use()
+        
+        if usage >= WARN_USAGE and alarm_flag == False:
+            alarm_flag = True
+            size = get_dir_size(OUTPUT_DIR)
+            root_logger.critical("Warning! Low Disk Space. Delete Videos")
+            send_email("여유공간 확보 필요", f"현재 다운로드된 동영상 용량 : {size} GB ({usage}% / 100%)\n다른 동영상 다운로드를 위해 하드디스크의 여유 공간을 확보하세요.")
+        elif usage < WARN_USAGE :
+            alarm_flag = False
+
+        time.sleep(300)
+
+
 if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
     root_logger.critical("         mining/upload      written by ywlee")
     root_logger.critical("============================================")
+    
     create_dir(OUTPUT_DIR)
     create_dir(SAVED_DIR)
-    check_stream()
+    executor.submit(check_stream)
+    executor.submit(check_filesystem)
     upload_saved()
+    
+

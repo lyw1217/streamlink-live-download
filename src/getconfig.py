@@ -45,32 +45,58 @@ if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
 elif SYS_PLATFORM == 'Windows':
     CONFIG_PATH = os.path.join(ROOT_DIR, 'config\config.json')
 
-with open(CONFIG_PATH) as json_file:
-    configs = json.load(json_file)
-    f_send = {}
+if os.path.isfile(CONFIG_PATH):
+    with open(CONFIG_PATH) as json_file:
+        configs = json.load(json_file)
 
-    root_logger.critical('=== CONFIGURATIONS ===')
-    INTERVAL = float(configs['INTERVAL'])
-    root_logger.critical(f'INTERVAL = {INTERVAL}')
-    QUALITY = configs['QUALITY']
-    root_logger.critical(f'QUALITY = {QUALITY}')
-    OUTPUT_DIR = configs['OUTPUT_DIR']
-    root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
-    FILE_RULE = configs['FILE_RULE']
-    root_logger.critical(f'FILE_RULE = {FILE_RULE}')
-    TARGET_URL = configs['TARGET_URL']
-    root_logger.critical(f'TARGET_URL = {TARGET_URL}')
-    STREAMLINK_CMD = configs['STREAMLINK_CMD']
-    root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
-    STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
-    root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
-    STREAMLINK_LOG_OPTIONS = configs['STREAMLINK_LOG_OPTIONS']
-    root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
-    STREAMLINK_LOG_PATH = configs['STREAMLINK_LOG_PATH']
-    root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
-    UPLOAD_YOUTUBE_PY = configs['UPLOAD_YOUTUBE_PY']
-    root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
-    PYTHON_CMD = configs['PYTHON_CMD']
-    root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
-    SAVED_DIR = configs['SAVED_DIR']
-    root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
+        root_logger.critical('=== CONFIGURATIONS LOADED ===')
+        INTERVAL = float(configs['INTERVAL'])
+        root_logger.critical(f'INTERVAL = {INTERVAL}')
+        QUALITY = configs['QUALITY']
+        root_logger.critical(f'QUALITY = {QUALITY}')
+        OUTPUT_DIR = configs['OUTPUT_DIR']
+        root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
+        FILE_RULE = configs['FILE_RULE']
+        root_logger.critical(f'FILE_RULE = {FILE_RULE}')
+        TARGET_URL = configs['TARGET_URL']
+        root_logger.critical(f'TARGET_URL = {TARGET_URL}')
+        STREAMLINK_CMD = configs['STREAMLINK_CMD']
+        root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
+        STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
+        root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
+        STREAMLINK_LOG_OPTIONS = configs['STREAMLINK_LOG_OPTIONS']
+        root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
+        STREAMLINK_LOG_PATH = configs['STREAMLINK_LOG_PATH']
+        root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
+        UPLOAD_YOUTUBE_PY = configs['UPLOAD_YOUTUBE_PY']
+        root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
+        PYTHON_CMD = configs['PYTHON_CMD']
+        root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
+        SAVED_DIR = configs['SAVED_DIR']
+        root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
+        WARN_USAGE = int(configs['WARN_USAGE'])
+        root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
+else :
+    root_logger.critical(f"No {CONFIG_PATH}. Configuration file is required.")
+    exit()
+
+
+''' Private Configuration '''
+if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
+    SECRETS_PATH = os.path.join(ROOT_DIR, 'config/secrets.json')
+elif SYS_PLATFORM == 'Windows':
+    SECRETS_PATH = os.path.join(ROOT_DIR, 'config\secrets.json')
+
+if os.path.isfile(SECRETS_PATH):
+    with open(SECRETS_PATH) as json_file:
+        sec = json.load(json_file)
+
+        root_logger.critical('=== PRIVATE LOADED ===')
+        FROM_EMAIL_ADDR = sec['FROM_EMAIL_ADDR']
+        TO_EMAIL_ADDR = sec['TO_EMAIL_ADDR']
+        
+else :
+    root_logger.critical(f"No {SECRETS_PATH}. Don't send email")
+    
+
+

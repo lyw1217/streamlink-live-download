@@ -1,5 +1,6 @@
 {
   "INTERVAL": 5,
+  "WARN_USAGE": 85,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/ubuntu/mnt/Twitch/recordings",
   "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
