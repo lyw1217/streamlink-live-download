@@ -1,4 +1,3 @@
-from signal import alarm
 import subprocess as sp
 import concurrent.futures as cf
 import time
@@ -65,7 +64,7 @@ def get_stream_info(streamer, url):
     opts = list()
 
     opts.append('--json')
-    opts += f'{STREAMLINK_OPTIONS}'.split(' ')
+    opts += f'{STREAMLINK_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
     opts.append(f'{url}')
 
     args.append(STREAMLINK_CMD)
@@ -123,18 +122,23 @@ def cmd_youtube_api(dir, name) :
             '--privacyStatus',  "private"
             ], 
             stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-    out = p.communicate()[0]
-    root_logger.critical(out)
-    return out
+    try:
+        outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
+    except:
+        p.kill()
+        outs = p.communicate()
+    
+    root_logger.critical(outs[0])
+    return outs[0]
 
 
 def upload_youtube(author, title, date):
     root_logger.critical(f'upload_youtube author={author}, title={title}, date={date}')
 
-    upload_flag = False
-
     file_list = os.listdir(OUTPUT_DIR)
     file_list_ts = [file for file in file_list if file.endswith(".ts")]
+    
+    match_flag = False
 
     for name in file_list_ts:
         if author in name:
@@ -165,7 +169,6 @@ def upload_youtube(author, title, date):
 
                 if check_quota(out) :
                     # 업로드 성공 시 파일 삭제
-                    upload_flag = True
                     root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
                     #os.remove(f"{OUTPUT_DIR}/{name}")
                 else :
@@ -177,22 +180,20 @@ def upload_youtube(author, title, date):
                     out = cmd_youtube_api(OUTPUT_DIR, name)
 
                     if check_quota(out) :
-                        upload_flag = True
                         root_logger.critical(f"RETRY Success upload youtube. Remove file")
                         root_logger.critical(f"RETRY Remove {OUTPUT_DIR}/{name}")
                         #os.remove(f"{OUTPUT_DIR}/{name}")
                     else :
                         # 재시도 실패 시 임시 저장
-                        upload_flag = False
                         root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
                         root_logger.critical(f"RETRY Replace {OUTPUT_DIR}/{name} to {SAVED_DIR}/{name}")
                         os.replace(f"{OUTPUT_DIR}/{name}", f"{SAVED_DIR}/{name}")
                         send_email("유튜브 업로드 실패", f"파일명 : '{name}'\n 업로드 실패. 파일을 '{SAVED_DIR}/{name}' 경로로 이동하였습니다.")
                 break
 
-    if upload_flag != True :
+    if match_flag != True :
         root_logger.critical(f'Err. Failed upload_youtube author={author}, title={title}, date={date}, file_list_ts={file_list_ts}')
-        send_email("유튜브 업로드 실패", f"파일명 : {name}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n Streamlink에서 Metadata를 정상적으로 가져오지 못했습니다. 수동으로 업로드해야합니다.")
+        send_email("유튜브 업로드 실패", f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n Streamlink에서 Metadata를 정상적으로 가져오지 못했습니다. 수동으로 업로드해야합니다.")
 
     return
 
