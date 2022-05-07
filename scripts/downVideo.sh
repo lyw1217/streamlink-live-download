@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# 하루 전 영상을 다운로드받는 스크립트
+
 VIDEO_PATH="${HOME}/mnt/Twitch/recordings"
 INPUT="/home/ubuntu/Documents/github/streamlink-live-download/download_url.txt"
 TARGET_URLS=()
@@ -29,7 +32,7 @@ do
     echo "download start!!!"
 	echo $arg
     
-	$CMD -g -f bestvideo+bestaudio/best --limit-rate 8M --playlist-end 5 --buffer-size 16K --dateafter now-1day -o "${VIDEO_PATH}/%(uploader)s %(upload_date)s %(title)s.%(ext)s" "${arg}/videos"
+	$CMD -g -f bestvideo+bestaudio/best --limit-rate 8M --playlist-end 5 --buffer-size 16K --dateafter now-1day -o "${VIDEO_PATH}/%(uploader)s_%(upload_date)s_%(title)s.%(ext)s" "${arg}/videos"
     
     echo "download complete!!!"
     echo ""

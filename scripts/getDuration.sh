@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# 영상의 길이를 구하는 스크립트 
+
 #if [ $# -eq 0 ]; then
 #	echo "No arguments supplied"
 #fi
 VIDEO_PATH="${HOME}/mnt/Twitch/recordings"
-PROGRAM="ffmpeg"
+PROGRAM="ffprobe"
 CMD=`command -v ${PROGRAM} 2>/dev/null`
 
 if [ ! -d ${VIDEO_PATH} ]; then
@@ -20,25 +22,32 @@ if [ -z "$CMD" ]; then
     exit
 fi 
 
-#for arg in "$@"
-for arg in "$VIDEO_PATH"/*
-do
-	if [ ! -e "$arg" ]; then
-		echo "File "$arg" is not exists."
-		continue
-	fi
-	
-	fileext=${arg##*.}
-	if [ "$fileext" == "txt" ]; then
-		continue
-	fi
-	
-	echo $arg
+get_duration() {
+	for arg in "$1"/*
+	do
+		if [ ! -e "$arg" ]; then
+			echo "File "$arg" is not exists."
+			continue
+		fi
 
-	ffmpeg -i $arg 2>&1 | grep Duration | awk '{print $2}' | tr -d ,
+		if [ -d "$arg" ]; then
+			echo "directory ${arg}"
+			get_duration $arg
+			continue
+		fi
+		
+		fileext=${arg##*.}
+		if [ "$fileext" == "txt" ]; then
+			continue
+		fi
+		
+		echo $arg
 
-	echo
+		$CMD -i "${arg}" 2>&1 | grep Duration | awk '{print $2}' | tr -d ,
 
-done
+		echo
 
-sleep 5
+	done
+}
+
+get_duration $VIDEO_PATH
