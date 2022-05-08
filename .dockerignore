@@ -1,0 +1,6 @@
+Dockerfile
+logs/*.log
+.git
+.gitignore
+__pycache__
+venv

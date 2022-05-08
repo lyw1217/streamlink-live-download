@@ -45,7 +45,9 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 #CLIENT_SECRETS_FILE = "client_secrets.json"
-CLIENT_SECRETS_FILE = "/home/ubuntu/Documents/github/streamlink-live-download/src/client_secrets.json"
+BASE_DIR = os.path.dirname((os.path.abspath(__file__)))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+CLIENT_SECRETS_FILE = os.path.join(ROOT_DIR, "src/client_secrets.json")
 # This OAuth 2.0 access scope allows an application to upload files to the
 # authenticated user's YouTube channel, but doesn't allow other types of access.
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
