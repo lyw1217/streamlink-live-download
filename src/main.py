@@ -19,8 +19,8 @@ def send_email(subject, content):
     msg = EmailMessage()
     msg.set_content(content)
 
-    # me == the sender's email address
-    # you == the recipient's email address
+    # from == the sender's email address
+    # to == the recipient's email address
     msg['Subject'] = f"[Pystreamlink] {subject}"
     msg['From'] = FROM_EMAIL_ADDR
     msg['To'] = TO_EMAIL_ADDR
@@ -36,23 +36,30 @@ def create_dir(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    except OSError:
+    except (OSError, Exception):
         root_logger.critical("Error : Creating directory " + directory)
 
+command = "which google-chrome-stable"
+p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+CHROME_CMD = p.communicate()[0].rstrip()
+if "google-chrome-stable" not in CHROME_CMD :
+    root_logger.critical("Err. google-chrome-stable not installed..")
 
 # 채굴 시작
 def start_mining(url):
-    root_logger.critical(f"start mining... > '{url}'")
-    p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-    out = p.communicate()[0]
-    root_logger.critical(out)
+    if len(CHROME_CMD) != 0 :
+        root_logger.critical(f"start mining... > '{url}'")
+        p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+        out = p.communicate()[0]
+        root_logger.critical(out)
 
 # 채굴 종료
 def stop_mining(author):
-    root_logger.critical(f"stop mining... > '{author}'")
-    p = sp.run(['wmctrl', '-c', f'{author} - Twitch'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-    out = p.communicate()[0]
-    root_logger.critical(out)
+    if len(CHROME_CMD) != 0 :
+        root_logger.critical(f"stop mining... > '{author}'")
+        p = sp.run(['wmctrl', '-c', f'{author} - Twitch'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+        out = p.communicate()[0]
+        root_logger.critical(out)
 
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
@@ -109,7 +116,7 @@ def check_quota(str):
                 root_logger.critical("Err. quotaExceeded.")
                 return False
     
-        root_logger.critical("Err. Unknown Error occurred.")
+        root_logger.critical(f"Err. upload_youtube.py Error occurred. err='{str}'")
     
     return False
 
@@ -124,12 +131,42 @@ def cmd_youtube_api(dir, name) :
             stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
     try:
         outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
-    except:
+    except Exception as e:
         p.kill()
         outs = p.communicate()
+        root_logger.critical(e)
     
     root_logger.critical(outs[0])
     return outs[0]
+
+
+def start_upload(author, name):
+    root_logger.critical(f"youtube upload start {author} > file name : '{name}'")
+    out = cmd_youtube_api(OUTPUT_DIR, name)
+
+    if check_quota(out) :
+        # 업로드 성공 시 파일 삭제
+        root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
+        os.remove(f"{OUTPUT_DIR}/{name}")
+    else :
+        root_logger.critical(f"Err. Failed upload youtube, Wait 60 seconds and Retry")
+        # 1분 제한 회피
+        time.sleep(60)
+        # 업로드 실패 시 재시도
+        root_logger.critical(f"RETRY youtube upload start {author} > file name : '{name}'")
+        out = cmd_youtube_api(OUTPUT_DIR, name)
+
+        if check_quota(out) :
+            # 업로드 성공 시 파일 삭제
+            root_logger.critical(f"RETRY Success upload youtube. Remove file")
+            root_logger.critical(f"RETRY Remove {OUTPUT_DIR}/{name}")
+            os.remove(f"{OUTPUT_DIR}/{name}")
+        else :
+            # 재시도 실패 시 임시 저장
+            root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
+            root_logger.critical(f"RETRY Replace {OUTPUT_DIR}/{name} to {SAVED_DIR}/{name}")
+            os.replace(f"{OUTPUT_DIR}/{name}", f"{SAVED_DIR}/{name}")
+            send_email("유튜브 업로드 실패", f"파일명 : '{name}'\n 업로드 실패. 파일을 '{SAVED_DIR}/{name}' 경로로 이동하였습니다.")
 
 
 def upload_youtube(author, title, date):
@@ -142,10 +179,8 @@ def upload_youtube(author, title, date):
 
     for name in file_list_ts:
         if author in name:
-            l_plus_date = [
-                date+datetime.timedelta(seconds=i) for i in range(15)]
-            l_minus_date = [
-                date-datetime.timedelta(seconds=i) for i in range(5)]
+            l_plus_date = [date+datetime.timedelta(seconds=i) for i in range(15)]
+            l_minus_date = [date-datetime.timedelta(seconds=i) for i in range(5)]
 
             # file name format : "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
             file_date = datetime.datetime.strptime(name.split(']')[1][1:18], "%Y-%m-%d-%H%M%S")
@@ -164,36 +199,33 @@ def upload_youtube(author, title, date):
                         break
 
             if match_flag == True:
-                root_logger.critical(f"youtube upload start {author} > file name : '{name}'")
-                out = cmd_youtube_api(OUTPUT_DIR, name)
-
-                if check_quota(out) :
-                    # 업로드 성공 시 파일 삭제
-                    root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
-                    #os.remove(f"{OUTPUT_DIR}/{name}")
-                else :
-                    root_logger.critical(f"Err. Failed upload youtube, Wait 60 seconds and Retry")
-                    # 1분 제한 회피
-                    time.sleep(60)
-                    # 업로드 실패 시 재시도
-                    root_logger.critical(f"RETRY youtube upload start {author} > file name : '{name}'")
-                    out = cmd_youtube_api(OUTPUT_DIR, name)
-
-                    if check_quota(out) :
-                        root_logger.critical(f"RETRY Success upload youtube. Remove file")
-                        root_logger.critical(f"RETRY Remove {OUTPUT_DIR}/{name}")
-                        #os.remove(f"{OUTPUT_DIR}/{name}")
+                cut_count = cut_video(f"{OUTPUT_DIR}/{name}")
+                if cut_count == 0 :
+                    start_upload(author, name)
+                elif cut_count > 0 :
+                    # 30시간까지 가능
+                    if cut_count < 2 :
+                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
+                        start_upload(author, f"{name.rstrip('.ts')}_2.ts")      # 6 ~ 18
+                    elif cut_count >= 2 and cut_count < 4 :
+                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
+                        start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
+                        start_upload(author, f"{name.rstrip('.ts')}_2_2.ts")    # 12 ~ 24
                     else :
-                        # 재시도 실패 시 임시 저장
-                        root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
-                        root_logger.critical(f"RETRY Replace {OUTPUT_DIR}/{name} to {SAVED_DIR}/{name}")
-                        os.replace(f"{OUTPUT_DIR}/{name}", f"{SAVED_DIR}/{name}")
-                        send_email("유튜브 업로드 실패", f"파일명 : '{name}'\n 업로드 실패. 파일을 '{SAVED_DIR}/{name}' 경로로 이동하였습니다.")
+                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
+                        start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
+                        start_upload(author, f"{name.rstrip('.ts')}_2_2_1.ts")  # 12 ~ 18
+                        start_upload(author, f"{name.rstrip('.ts')}_2_2_2.ts")  # 18 ~ 30
+                else :
+                    send_email("유튜브 업로드 실패",
+                     f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n 동영상을 자르는데 실패했습니다. 수동으로 자른 뒤 업로드해야 합니다.")
+                
                 break
 
     if match_flag != True :
         root_logger.critical(f'Err. Failed upload_youtube author={author}, title={title}, date={date}, file_list_ts={file_list_ts}')
-        send_email("유튜브 업로드 실패", f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n Streamlink에서 Metadata를 정상적으로 가져오지 못했습니다. 수동으로 업로드해야합니다.")
+        send_email("유튜브 업로드 실패",
+         f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n Streamlink에서 Metadata를 정상적으로 가져오지 못했습니다. 수동으로 업로드해야 합니다.")
 
     return
 
@@ -286,7 +318,7 @@ def upload_saved() :
                 if check_quota(out) :
                     # 업로드 성공 시 파일 삭제
                     root_logger.critical(f"[SAVED] Remove {SAVED_DIR}/{name}")
-                    #os.remove(f"{SAVED_DIR}/{name}")
+                    os.remove(f"{SAVED_DIR}/{name}")
                 else :
                     root_logger.critical(f"[SAVED] Err. Failed upload youtube, Wait 60 seconds and Retry")
                     # 1분 제한 회피
@@ -295,9 +327,10 @@ def upload_saved() :
                     out = cmd_youtube_api(SAVED_DIR, name)
 
                     if check_quota(out) :
+                        # 업로드 성공 시 파일 삭제
                         root_logger.critical(f"[SAVED] RETRY Success upload youtube. Remove file")
                         root_logger.critical(f"[SAVED] RETRY Remove {OUTPUT_DIR}/{name}")
-                        #os.remove(f"{OUTPUT_DIR}/{name}")
+                        os.remove(f"{OUTPUT_DIR}/{name}")
                     else :
                         # 재시도 실패 시 로깅
                         root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
@@ -331,7 +364,14 @@ def get_filesystem_use():
     uses = list()
     for r in result :
         r = r.strip()
-        uses.append(int(r[0 : len(r) - 1]))
+        
+        try :
+            u = int(r[0 : len(r) - 1])
+        except Exception as e:
+            root_logger.critical(f"Err. Result is not Integer. result = '{r}', exception,  {str(e)}")
+            u = 0
+
+        uses.append(u)
     return max(uses)
 
 def check_filesystem() :
@@ -351,7 +391,82 @@ def check_filesystem() :
 
         time.sleep(300)
 
+# return : hour, minute, seconds
+def get_duration(video_path):
+    command = "which ffprobe"
+    p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+    ffprobe_cmd = p.communicate()[0].rstrip()
+    if "ffprobe" not in ffprobe_cmd :
+        root_logger.critical("Err. ffmpeg not installed..")
+        return (-1)
+    
+    command = [rf"{ffprobe_cmd} -i '{video_path}' 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,//"]
+    p = sp.Popen(command, stdout=sp.PIPE, text=True, shell=True)
+    outs = p.communicate()
+    
+    duration = outs[0].rstrip().split(':')
+    try :
+        hour = int(duration[0])
+        min = int(duration[1])
+        sec = int(duration[2].split('.')[0])
+    except (ValueError, IndexError, Exception) as e:
+        root_logger.critical(f"Err. duration = {duration}, e='{str(e)}'")
+        hour, min, sec = 0, 0, 0
 
+    return hour
+    #TODO
+    #return min
+
+def cut_video(video_path) :
+    h = get_duration(video_path)
+
+    if h >= 12 :
+    #TODO
+    #if h >= 2 :
+        cut_count = 0
+        command = "which ffmpeg"
+        p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+        ffmpeg_cmd = p.communicate()[0].rstrip()
+        if "ffmpeg" not in ffmpeg_cmd :
+            root_logger.critical("Err. ffmpeg not installed..")
+            return (-1)
+        
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 06:00:02 -c:v copy -c:a copy "{video_path}_1.ts"']
+        #TODO
+        #command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 00:01:02 -c:v copy -c:a copy "{video_path.rstrip(".ts")}_1.ts"']
+        root_logger.critical("cut video 00:00:00 ~ 06:00:02 start")
+        try:
+            p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+            outs = p.communicate()[0]
+            root_logger.critical(outs)
+            cut_count += 1
+        except Exception as e :
+            root_logger.critical("Err. cut_video()" + str(e))
+            return (-1)
+            
+        
+        root_logger.critical("cut video 05:59:58 ~ EOF start")
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_path}_2.ts"']
+        #TODO
+        #command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 00:00:58 -c:v copy -c:a copy "{video_path.rstrip(".ts")}_2.ts"']
+        try:
+            p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+            outs = p.communicate()[0]
+            root_logger.critical(outs)
+            cut_count += 1
+        except Exception as e :
+            root_logger.critical("Err. cut_video()" + str(e))
+            return (-1)
+
+        res = cut_video(f"{video_path.rstrip('.ts')}_2.ts")
+        if res < 0 :
+            root_logger.critical("Err. Failed Cut Video")
+            return (-1)
+        
+        return cut_count + res
+
+    return 0
+    
 if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
@@ -364,5 +479,3 @@ if __name__ == '__main__':
     executor.submit(check_stream)
     executor.submit(check_filesystem)
     upload_saved()
-    
-
