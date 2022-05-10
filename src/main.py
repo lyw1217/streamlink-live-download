@@ -246,8 +246,9 @@ def start_streamlink(streamer, url):
         author, title = get_stream_info(streamer, url)
 
         if author != '' and title != '':
-            time.sleep(1)
             executor.submit(start_mining, url=url)
+            time.sleep(1)
+
             args = list()
             opts = list()
 
@@ -263,17 +264,15 @@ def start_streamlink(streamer, url):
 
             args.append(STREAMLINK_CMD)
             args += opts
-
+            
             date = datetime.datetime.now()
 
             sp.call(args)
             
-            time.sleep(1)
             executor.submit(stop_mining, author=author)
             time.sleep(5)
 
             executor.submit(upload_youtube, author=author, title=title, date=date)
-            time.sleep(10)
             i = 0
 
         author = ''
