@@ -1,13 +1,25 @@
 import os
+import sys
 import json
 import platform
 import logging
 import logging.config
 import subprocess as sp
 
+def create_log_dir(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print("Info : Creating directory " + directory)
+    except (OSError, Exception):
+        print("Error : Failed creating directory " + directory)
+        sys.exit()
+
 BASE_DIR = os.path.dirname((os.path.abspath(__file__)))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 SYS_PLATFORM = platform.system()
+
+create_log_dir(os.path.join(ROOT_DIR, 'logs'))
 
 ''' Logging Configuration '''
 if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
@@ -43,7 +55,7 @@ if os.path.isfile(LOGGING_PATH):
     '''
 else :
     print("logging.json file is not exist")
-    exit()
+    sys.exit()
 
 
 
@@ -74,7 +86,7 @@ if len(IS_CONTAINER) > 0 :
     STREAMLINK_CMD = p.communicate()[0].rstrip()
     if "streamlink" not in STREAMLINK_CMD :
         root_logger.critical("Err. streamlink not installed..")
-        exit()
+        sys.exit()
     root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
     STREAMLINK_OPTIONS = "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
     root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
@@ -89,7 +101,7 @@ if len(IS_CONTAINER) > 0 :
     PYTHON_CMD = p.communicate()[0].rstrip()
     if "python3" not in PYTHON_CMD :
         root_logger.critical("Err. python3 not installed..")
-        exit()
+        sys.exit()
     root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
     SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
     root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
@@ -141,7 +153,7 @@ else :
                 STREAMLINK_CMD = p.communicate()[0].rstrip()
                 if "streamlink" not in STREAMLINK_CMD :
                     root_logger.critical("Err. streamlink not installed..")
-                    exit()
+                    sys.exit()
             root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
 
             try :
@@ -167,6 +179,9 @@ else :
             except KeyError :
                 UPLOAD_YOUTUBE_PY = os.path.join(ROOT_DIR, "src/upload_youtube.py")
             root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
+            if not os.path.isfile(UPLOAD_YOUTUBE_PY):
+                root_logger.critical(f'Err. {UPLOAD_YOUTUBE_PY} dose not exist.')
+                sys.exit()
 
             try :
                 PYTHON_CMD = configs['PYTHON_CMD']
@@ -176,7 +191,7 @@ else :
                 PYTHON_CMD = p.communicate()[0].rstrip()
                 if "python3" not in PYTHON_CMD :
                     root_logger.critical("Err. python3 not installed..")
-                    exit()
+                    sys.exit()
             root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
 
             try :
@@ -192,7 +207,7 @@ else :
             root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
-        exit()
+        sys.exit()
 
 
 ''' Private Configuration '''

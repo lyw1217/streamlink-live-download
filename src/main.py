@@ -36,14 +36,16 @@ def create_dir(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
+            root_logger.critical("Info : Creating directory " + directory)
     except (OSError, Exception):
-        root_logger.critical("Error : Creating directory " + directory)
+        root_logger.critical("Error : Failed creating directory " + directory)
+        sys.exit()
 
 command = "which google-chrome-stable"
 p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
 CHROME_CMD = p.communicate()[0].rstrip()
 if "google-chrome-stable" not in CHROME_CMD :
-    root_logger.critical("Err. google-chrome-stable not installed..")
+    root_logger.critical("Info. google-chrome-stable not installed.. Don't Mine")
 
 # 채굴 시작
 def start_mining(url):
@@ -470,7 +472,10 @@ if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
-    root_logger.critical("         mining/upload      written by ywlee")
+    if len(CHROME_CMD) != 0 :
+        root_logger.critical("         mining/upload      written by ywlee")
+    else :
+        root_logger.critical("            upload          written by ywlee")
     root_logger.critical("============================================")
     
     create_dir(OUTPUT_DIR)
