@@ -96,6 +96,9 @@ if len(IS_CONTAINER) > 0 :
     root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
     UPLOAD_YOUTUBE_PY = os.path.join(ROOT_DIR, "src/upload_youtube.py")
     root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
+    if not os.path.isfile(UPLOAD_YOUTUBE_PY):
+        root_logger.critical(f'Err. {UPLOAD_YOUTUBE_PY} dose not exist.')
+        sys.exit()
     command = "which python3"
     p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
     PYTHON_CMD = p.communicate()[0].rstrip()

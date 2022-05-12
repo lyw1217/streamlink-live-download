@@ -1,3 +1,4 @@
+altgraph==0.17.2
 apiclient==1.0.4
 autopep8==1.6.0
 beautifulsoup4==4.11.1
@@ -29,6 +30,8 @@ pycodestyle==2.8.0
 pycountry==22.3.5
 pycparser==2.21
 pycryptodome==3.14.1
+pyinstaller==5.0.1
+pyinstaller-hooks-contrib==2022.4
 pyOpenSSL==22.0.0
 pyparsing==3.0.8
 PySocks==1.7.1
