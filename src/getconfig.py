@@ -70,46 +70,55 @@ else :
 IS_CONTAINER = os.getenv("IS_CONTAINER", "")
 # container 인 경우
 if len(IS_CONTAINER) > 0 :
-    root_logger.critical('=== CONFIGURATIONS LOADED ===')
-    INTERVAL = 5
-    root_logger.critical(f'INTERVAL = {INTERVAL}')   
-    QUALITY = 'best'
-    root_logger.critical(f'QUALITY = {QUALITY}')
-    OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/mnt/recordings")
-    root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
-    FILE_RULE = "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
-    root_logger.critical(f'FILE_RULE = {FILE_RULE}')
-    TARGET_URL = os.path.join(ROOT_DIR, "target_url.txt")
-    root_logger.critical(f'TARGET_URL = {TARGET_URL}')
-    command = "which streamlink"
-    p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
-    STREAMLINK_CMD = p.communicate()[0].rstrip()
-    if "streamlink" not in STREAMLINK_CMD :
-        root_logger.critical("Err. streamlink not installed..")
+    if os.path.isfile(CONFIG_PATH):
+        with open(CONFIG_PATH) as json_file :
+            configs = json.load(json_file)
+
+            root_logger.critical('=== CONTAINER CONFIGURATIONS LOADED ===')
+            INTERVAL = configs['INTERVAL']
+            root_logger.critical(f'INTERVAL = {INTERVAL}')   
+            QUALITY = configs['QUALITY']
+            root_logger.critical(f'QUALITY = {QUALITY}')
+            OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/mnt/recordings")
+            root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
+            FILE_RULE = "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
+            root_logger.critical(f'FILE_RULE = {FILE_RULE}')
+            TARGET_URL = os.path.join(ROOT_DIR, "target_url.txt")
+            root_logger.critical(f'TARGET_URL = {TARGET_URL}')
+            command = "which streamlink"
+            p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+            STREAMLINK_CMD = p.communicate()[0].rstrip()
+            if "streamlink" not in STREAMLINK_CMD :
+                root_logger.critical("Err. streamlink not installed..")
+                sys.exit()
+            root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
+            STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
+            root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
+            STREAMLINK_LOG_OPTIONS = configs['STREAMLINK_LOG_OPTIONS']
+            root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
+            STREAMLINK_LOG_PATH = os.path.join(ROOT_DIR, "logs/streamlink")
+            root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
+            UPLOAD_YOUTUBE_PY = os.path.join(ROOT_DIR, "src/upload_youtube.py")
+            root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
+            if not os.path.isfile(UPLOAD_YOUTUBE_PY):
+                root_logger.critical(f'Err. {UPLOAD_YOUTUBE_PY} dose not exist.')
+                sys.exit()
+            command = "which python3"
+            p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+            PYTHON_CMD = p.communicate()[0].rstrip()
+            if "python3" not in PYTHON_CMD :
+                root_logger.critical("Err. python3 not installed..")
+                sys.exit()
+            root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
+            SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
+            root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
+            WARN_USAGE = configs['WARN_USAGE']
+            root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
+            PIPE_FLAG = configs["PIPE_FLAG"]
+            root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
+    else :
+        root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()
-    root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
-    STREAMLINK_OPTIONS = "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
-    root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
-    STREAMLINK_LOG_OPTIONS = "info"
-    root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
-    STREAMLINK_LOG_PATH = os.path.join(ROOT_DIR, "logs/streamlink")
-    root_logger.critical(f'STREAMLINK_LOG_PATH = {STREAMLINK_LOG_PATH}')
-    UPLOAD_YOUTUBE_PY = os.path.join(ROOT_DIR, "src/upload_youtube.py")
-    root_logger.critical(f'UPLOAD_YOUTUBE = {UPLOAD_YOUTUBE_PY}')
-    if not os.path.isfile(UPLOAD_YOUTUBE_PY):
-        root_logger.critical(f'Err. {UPLOAD_YOUTUBE_PY} dose not exist.')
-        sys.exit()
-    command = "which python3"
-    p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
-    PYTHON_CMD = p.communicate()[0].rstrip()
-    if "python3" not in PYTHON_CMD :
-        root_logger.critical("Err. python3 not installed..")
-        sys.exit()
-    root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
-    SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
-    root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
-    WARN_USAGE = 85
-    root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
 
 # container가 아닌 경우
 else :
@@ -206,8 +215,10 @@ else :
             try :
                 WARN_USAGE = int(configs['WARN_USAGE'])
             except KeyError :
-                WARN_USAGE = 85
+                WARN_USAGE = 70
             root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
+            PIPE_FLAG = False
+            root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()
@@ -238,3 +249,21 @@ else :
     
 
 
+''' Youtube Upload Secrets '''
+if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
+    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src/client_secrets.json')
+    OAUTH_PATH = os.path.join(ROOT_DIR, 'src/upload_youtube.py-oauth2.json')
+elif SYS_PLATFORM == 'Windows':
+    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src\client_secrets.json')
+    OAUTH_PATH = os.path.join(ROOT_DIR, 'src\upload_youtube.py-oauth2.json')
+else :
+    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src/client_secrets.json')
+    OAUTH_PATH = os.path.join(ROOT_DIR, 'src/upload_youtube.py-oauth2.json')
+
+if os.path.isfile(CLIENT_SEC_PATH) == False :
+    root_logger.critical(f"No client_secrets.json. check volumn")
+    sys.exit()
+    
+if os.path.isfile(OAUTH_PATH) == False :
+    root_logger.critical(f"No upload_youtube.py-oauth2.json. check volumn")
+    sys.exit()

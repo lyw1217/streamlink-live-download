@@ -7,6 +7,7 @@ import smtplib
 from email.message import EmailMessage
 
 from getconfig import *
+from pipe import *
 
 executor = cf.ThreadPoolExecutor(max_workers=32)
 
@@ -49,19 +50,27 @@ if "google-chrome-stable" not in CHROME_CMD :
 
 # 채굴 시작
 def start_mining(url):
-    if len(CHROME_CMD) != 0 :
-        root_logger.critical(f"start mining... > '{url}'")
-        p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-        out = p.communicate()[0]
-        root_logger.critical(out)
+    if len(CHROME_CMD) != 0 or PIPE_FLAG == True :
+        if PIPE_FLAG == True :
+            root_logger.critical(f"start mining... > '{url}' using pipe")
+            write_pipe(f"google-chrome-stable {url} --new-window")
+        else :
+            root_logger.critical(f"start mining... > '{url}'")
+            p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            out = p.communicate()[0]
+            root_logger.critical(out)
 
 # 채굴 종료
 def stop_mining(author):
-    if len(CHROME_CMD) != 0 :
-        root_logger.critical(f"stop mining... > '{author}'")
-        p = sp.run(['wmctrl', '-c', f'{author} - Twitch'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-        out = p.communicate()[0]
-        root_logger.critical(out)
+    if len(CHROME_CMD) != 0 or PIPE_FLAG == True :
+        if PIPE_FLAG == True :
+            root_logger.critical(f"start mining... > '{author}' using pipe")
+            write_pipe(f"wmctrl -c '{author} - Twitch'")
+        else :
+            root_logger.critical(f"stop mining... > '{author}'")
+            p = sp.run(['wmctrl', '-c', f"'{author} - Twitch'"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            out = p.communicate()[0]
+            root_logger.critical(out)
 
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
@@ -482,4 +491,6 @@ if __name__ == '__main__':
     create_dir(SAVED_DIR)
     executor.submit(check_stream)
     executor.submit(check_filesystem)
+    if PIPE_FLAG == True :
+        create_pipe()
     upload_saved()

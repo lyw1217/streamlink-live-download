@@ -198,3 +198,4 @@ recordings/*
 logs/*
 *.py-oauth2.json
 *secrets.json
+fifo-pystream
