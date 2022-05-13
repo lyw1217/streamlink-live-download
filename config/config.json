@@ -1,6 +1,6 @@
 {
   "INTERVAL": 5,
-  "WARN_USAGE": 85,
+  "WARN_USAGE": 70,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/ubuntu/mnt/Twitch/recordings",
   "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
@@ -11,5 +11,6 @@
   "STREAMLINK_LOG_PATH": "/home/ubuntu/Documents/github/streamlink-live-download/logs/streamlink",
   "UPLOAD_YOUTUBE_PY": "/home/ubuntu/Documents/github/streamlink-live-download/src/upload_youtube.py",
   "PYTHON_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/python",
-  "SAVED_DIR": "/home/ubuntu/mnt/Twitch/recordings/saved"
+  "SAVED_DIR": "/home/ubuntu/mnt/Twitch/recordings/saved",
+  "PIPE_FLAG": true
 }
