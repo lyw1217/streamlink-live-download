@@ -32,7 +32,7 @@ do
     echo "download start!!!"
 	echo $arg
     
-	$CMD -g -f bestvideo+bestaudio/best --limit-rate 8M --playlist-end 5 --buffer-size 16K --dateafter now-1day -o "${VIDEO_PATH}/%(uploader)s_%(upload_date)s_%(title)s.%(ext)s" "${arg}/videos"
+	$CMD -f bestvideo+bestaudio/best --playlist-end 5 --buffer-size 32K --dateafter now-1day -o "${VIDEO_PATH}/%(uploader)s_%(upload_date)s_%(title)s.%(ext)s" "${arg}/videos"
     
     echo "download complete!!!"
     echo ""

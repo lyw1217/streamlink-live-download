@@ -13,11 +13,11 @@ CONTAINER_CONFIG="/app/config/config.json"
 HOST_LOG_DIR="${PYSTREAM_HOME}/logs"
 CONTAINER_LOG_DIR="/app/logs"
 
-HOST_OUTPUT_DIR="/home/ubuntu/mnt/Twitch/recordings/"
+HOST_OUTPUT_DIR="/home/ubuntu/mnt/Twitch/recordings"
 CONTAINER_OUTPUT_DIR="/mnt/recordings"
 
-HOST_SAVED_DIR="/home/ubuntu/mnt/Twitch/recordings/saved/"
-CONTAINER_SAVED_DIR="/mnt/recordings/saved/"
+HOST_SAVED_DIR="/home/ubuntu/mnt/Twitch/recordings/saved"
+CONTAINER_SAVED_DIR="/mnt/recordings/saved"
 
 HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream"
 CONTAINER_PIPE_PATH="/app/fifo-pystream"
@@ -59,7 +59,7 @@ else
 	echo "container run in only background (--detach)"
 fi
 
-if [ -n "$($DOCKER ps -q --filter "name=${CONTAINER_NAME}" | grep -q .)" ]; then
+if [ -n "$($DOCKER ps -aq --filter "name=${CONTAINER_NAME}")" ]; then
 	$DOCKER stop ${CONTAINER_NAME} && $DOCKER rm -f ${CONTAINER_NAME}
 fi
 
