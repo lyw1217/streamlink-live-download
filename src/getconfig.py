@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import os
 import sys
 import json
@@ -22,15 +23,23 @@ SYS_PLATFORM = platform.system()
 create_log_dir(os.path.join(ROOT_DIR, 'logs'))
 
 ''' Logging Configuration '''
-if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
-    LOGGING_PATH = os.path.join(ROOT_DIR, 'config/logging.json')
-elif SYS_PLATFORM == 'Windows':
-    LOGGING_PATH = os.path.join(ROOT_DIR, 'config\logging.json')
+if SYS_PLATFORM == 'Windows':
+    LOGGING_PATH = os.path.join(ROOT_DIR, r'config\logging.json')
 else :
     LOGGING_PATH = os.path.join(ROOT_DIR, 'config/logging.json')
+
 if os.path.isfile(LOGGING_PATH):
     with open(LOGGING_PATH) as json_file:
         log_configs = json.load(json_file)
+        try :
+            log_filename = log_configs ['handlers']['file']['filename']
+            if SYS_PLATFORM == 'Windows':
+                log_configs ['handlers']['file']['filename'] = os.path.join(ROOT_DIR, fr'logs\{log_filename}')
+            else :
+                log_configs ['handlers']['file']['filename'] = os.path.join(ROOT_DIR, f'logs/{log_filename}')
+        except Exception :
+            print("failed to load logging.json")
+            sys.exit()
         logging.config.dictConfig(log_configs)
     root_logger = logging.getLogger()
     '''
@@ -60,10 +69,8 @@ else :
 
 
 ''' Main Configuration '''
-if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.json')
-elif SYS_PLATFORM == 'Windows':
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'config\config.json')
+if SYS_PLATFORM == 'Windows':
+    CONFIG_PATH = os.path.join(ROOT_DIR, r'config\config.json')
 else :
     CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.json')
 
@@ -76,7 +83,7 @@ if len(IS_CONTAINER) > 0 :
 
             root_logger.critical('=== CONTAINER CONFIGURATIONS LOADED ===')
             INTERVAL = configs['INTERVAL']
-            root_logger.critical(f'INTERVAL = {INTERVAL}')   
+            root_logger.critical(f'INTERVAL = {INTERVAL}')
             QUALITY = configs['QUALITY']
             root_logger.critical(f'QUALITY = {QUALITY}')
             OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/mnt/recordings")
@@ -225,10 +232,8 @@ else :
 
 
 ''' Private Configuration '''
-if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
-    SECRETS_PATH = os.path.join(ROOT_DIR, 'config/secrets.json')
-elif SYS_PLATFORM == 'Windows':
-    SECRETS_PATH = os.path.join(ROOT_DIR, 'config\secrets.json')
+if SYS_PLATFORM == 'Windows':
+    SECRETS_PATH = os.path.join(ROOT_DIR, r'config\secrets.json')
 else :
     SECRETS_PATH = os.path.join(ROOT_DIR, 'config/secrets.json')
 
@@ -250,12 +255,9 @@ else :
 
 
 ''' Youtube Upload Secrets '''
-if SYS_PLATFORM == 'Linux' or SYS_PLATFORM == 'Drawin':
-    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src/client_secrets.json')
-    OAUTH_PATH = os.path.join(ROOT_DIR, 'src/upload_youtube.py-oauth2.json')
-elif SYS_PLATFORM == 'Windows':
-    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src\client_secrets.json')
-    OAUTH_PATH = os.path.join(ROOT_DIR, 'src\upload_youtube.py-oauth2.json')
+if SYS_PLATFORM == 'Windows':
+    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, r'src\client_secrets.json')
+    OAUTH_PATH = os.path.join(ROOT_DIR, r'src\upload_youtube.py-oauth2.json')
 else :
     CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src/client_secrets.json')
     OAUTH_PATH = os.path.join(ROOT_DIR, 'src/upload_youtube.py-oauth2.json')
