@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import subprocess as sp
 import concurrent.futures as cf
 import time
@@ -64,11 +65,11 @@ def start_mining(url):
 def stop_mining(author):
     if len(CHROME_CMD) != 0 or PIPE_FLAG == True :
         if PIPE_FLAG == True :
-            root_logger.critical(f"start mining... > '{author}' using pipe")
+            root_logger.critical(f"stop mining... > '{author}' using pipe")
             write_pipe(f"wmctrl -c '{author} - Twitch'")
         else :
             root_logger.critical(f"stop mining... > '{author}'")
-            p = sp.run(['wmctrl', '-c', f"'{author} - Twitch'"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            p = sp.Popen(['wmctrl', '-c', f"'{author} - Twitch'"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
             out = p.communicate()[0]
             root_logger.critical(out)
 
@@ -211,10 +212,12 @@ def upload_youtube(author, title, date):
 
             if match_flag == True:
                 cut_count = cut_video(f"{OUTPUT_DIR}/{name}")
+                root_logger.critical(f"Info. cut_video() END. cut_count = {cut_count}")
                 if cut_count == 0 :
                     start_upload(author, name)
                 elif cut_count > 0 :
                     # 30시간까지 가능
+                    root_logger.critical(f"Info. upload cutted video. ")
                     if cut_count < 2 :
                         start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
                         start_upload(author, f"{name.rstrip('.ts')}_2.ts")      # 6 ~ 18
@@ -424,15 +427,12 @@ def get_duration(video_path):
         hour, min, sec = 0, 0, 0
 
     return hour
-    #TODO
-    #return min
 
 def cut_video(video_path) :
     h = get_duration(video_path)
 
     if h >= 12 :
-    #TODO
-    #if h >= 2 :
+        video_name = video_path.rstrip('.ts')
         cut_count = 0
         command = "which ffmpeg"
         p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
@@ -441,9 +441,7 @@ def cut_video(video_path) :
             root_logger.critical("Err. ffmpeg not installed..")
             return (-1)
         
-        command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 06:00:02 -c:v copy -c:a copy "{video_path}_1.ts"']
-        #TODO
-        #command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 00:01:02 -c:v copy -c:a copy "{video_path.rstrip(".ts")}_1.ts"']
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 06:00:02 -c:v copy -c:a copy "{video_name}_1.ts"']
         root_logger.critical("cut video 00:00:00 ~ 06:00:02 start")
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
@@ -456,9 +454,7 @@ def cut_video(video_path) :
             
         
         root_logger.critical("cut video 05:59:58 ~ EOF start")
-        command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_path}_2.ts"']
-        #TODO
-        #command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 00:00:58 -c:v copy -c:a copy "{video_path.rstrip(".ts")}_2.ts"']
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_name}_2.ts"']
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
             outs = p.communicate()[0]
@@ -468,11 +464,12 @@ def cut_video(video_path) :
             root_logger.critical("Err. cut_video()" + str(e))
             return (-1)
 
-        res = cut_video(f"{video_path.rstrip('.ts')}_2.ts")
+        res = cut_video(f"{video_name}_2.ts")
         if res < 0 :
             root_logger.critical("Err. Failed Cut Video")
             return (-1)
         
+        root_logger.critical(f"Info. cut_count = {cut_count}, res = {res}")
         return cut_count + res
 
     return 0
@@ -483,6 +480,8 @@ if __name__ == '__main__':
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
     if len(CHROME_CMD) != 0 :
         root_logger.critical("         mining/upload      written by ywlee")
+    elif len(CHROME_CMD) != 0 and PIPE_FLAG == True :
+        root_logger.critical("          pipe/upload       written by ywlee")
     else :
         root_logger.critical("            upload          written by ywlee")
     root_logger.critical("============================================")
