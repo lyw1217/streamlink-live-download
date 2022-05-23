@@ -71,7 +71,7 @@ def stop_mining(author):
             root_logger.critical(f"stop mining... > '{author}'")
             p = sp.Popen(['wmctrl', '-c', f"'{author} - Twitch'"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
             out = p.communicate()[0]
-            root_logger.critical(out)
+            root_logger.critical(f"wmctrl -c '{author} - Twitch'")
 
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
@@ -445,8 +445,8 @@ def cut_video(video_path) :
         root_logger.critical("cut video 00:00:00 ~ 06:00:02 start")
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-            outs = p.communicate()[0]
-            root_logger.critical(outs)
+            outs = p.communicate(timeout=7200)
+            root_logger.critical(outs[0])
             cut_count += 1
         except Exception as e :
             root_logger.critical("Err. cut_video()" + str(e))
@@ -457,8 +457,8 @@ def cut_video(video_path) :
         command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_name}_2.ts"']
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-            outs = p.communicate()[0]
-            root_logger.critical(outs)
+            outs = p.communicate(timeout=7200)
+            root_logger.critical(outs[0])
             cut_count += 1
         except Exception as e :
             root_logger.critical("Err. cut_video()" + str(e))
