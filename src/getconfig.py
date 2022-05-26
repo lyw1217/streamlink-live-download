@@ -151,6 +151,12 @@ else :
             except KeyError :
                 OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/mnt/recordings")
             root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
+            
+            try :
+                SAVED_DIR = configs['SAVED_DIR']
+            except KeyError :
+                SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
+            root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
 
             try :
                 FILE_RULE = configs['FILE_RULE']
@@ -212,12 +218,6 @@ else :
                     root_logger.critical("Err. python3 not installed..")
                     sys.exit()
             root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
-
-            try :
-                SAVED_DIR = configs['SAVED_DIR']
-            except KeyError :
-                SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
-            root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
 
             try :
                 WARN_USAGE = int(configs['WARN_USAGE'])

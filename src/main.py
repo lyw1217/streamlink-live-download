@@ -218,18 +218,21 @@ def upload_youtube(author, title, date):
                 elif cut_count > 0 :
                     # 30시간까지 가능
                     root_logger.critical(f"Info. upload cutted video. ")
-                    if cut_count < 2 :
+                    if cut_count == 2 :
                         start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
                         start_upload(author, f"{name.rstrip('.ts')}_2.ts")      # 6 ~ 18
-                    elif cut_count >= 2 and cut_count < 4 :
+                    elif cut_count == 4 :
                         start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
                         start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
                         start_upload(author, f"{name.rstrip('.ts')}_2_2.ts")    # 12 ~ 24
-                    else :
+                    elif cut_count == 6 :
                         start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
                         start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
                         start_upload(author, f"{name.rstrip('.ts')}_2_2_1.ts")  # 12 ~ 18
                         start_upload(author, f"{name.rstrip('.ts')}_2_2_2.ts")  # 18 ~ 30
+                    else :
+                        send_email("유튜브 업로드 실패",
+                        f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n 동영상을 자르는데 실패했습니다. 수동으로 자른 뒤 업로드해야 합니다.")
                 else :
                     send_email("유튜브 업로드 실패",
                      f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n 동영상을 자르는데 실패했습니다. 수동으로 자른 뒤 업로드해야 합니다.")
@@ -348,7 +351,6 @@ def upload_saved() :
                         # 재시도 실패 시 로깅
                         root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
                         send_email("SAVED 유튜브 업로드 실패", f"파일명 : '{name}'\n SAVED에 저장된 파일 업로드 실패.\n Google API의 할당량을 확인하세요.\n 다른 동영상 다운로드를 위해 하드디스크의 여유 공간을 확보하세요.")
-                break
 
             f_once = True
             time.sleep(60)
