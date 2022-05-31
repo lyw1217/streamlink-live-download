@@ -69,10 +69,18 @@ def stop_mining(author):
             write_pipe(f"wmctrl -c '{author} - Twitch'")
         else :
             root_logger.critical(f"stop mining... > '{author}'")
-            p = sp.Popen(['wmctrl', '-c', f"'{author} - Twitch'"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            #p = sp.Popen(['wmctrl', '-c', rf"'{author}' - Twitch"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            p = sp.Popen(['wmctrl', '-l'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
             out = p.communicate()[0]
-            root_logger.critical(f"wmctrl -c '{author} - Twitch'")
-
+            tab = str()
+            for t in out.split('\n'):
+                if author in t :
+                    tab = ' '.join(t.split(' ')[4:])
+            if tab is None :
+                root_logger.critical(f"tab is None..")
+            else :    
+                root_logger.critical(f"tab = {tab}")
+                p = sp.Popen(['wmctrl', '-c', rf"{tab}"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
@@ -287,7 +295,7 @@ def start_streamlink(streamer, url):
             sp.call(args)
             
             executor.submit(stop_mining, author=author)
-            time.sleep(5)
+            #time.sleep(5)
 
             executor.submit(upload_youtube, author=author, title=title, date=date)
             i = 0
