@@ -3,7 +3,19 @@ ARG OUTPUT_DIR=/mnt/recordings
 ARG SAVED_DIR=/mnt/recordings/saved
 ARG NAME=pystream
 
-FROM python:3.8 AS builder
+# FROM python:3.8 AS builder
+# LABEL stage=builder
+# ARG RUNTIME_DIR
+# ARG NAME
+# ENV IS_CONTAINER="True" \
+#     RUNTIME_DIR=${RUNTIME_DIR} \
+#     NAME=${NAME}
+# RUN mkdir -p $RUNTIME_DIR
+# WORKDIR $RUNTIME_DIR
+# COPY . .
+# RUN pip install -r ./requirements.txt
+
+FROM pystream_builder AS builder
 LABEL stage=builder
 ARG RUNTIME_DIR
 ARG NAME
@@ -13,7 +25,6 @@ ENV IS_CONTAINER="True" \
 RUN mkdir -p $RUNTIME_DIR
 WORKDIR $RUNTIME_DIR
 COPY . .
-RUN pip install -r ./requirements.txt
 RUN pyinstaller --onefile \ 
 				--clean \ 
 				--name $NAME \ 
