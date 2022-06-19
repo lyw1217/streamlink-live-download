@@ -331,7 +331,7 @@ def upload_saved() :
     while True:
         date = datetime.datetime.now()
 
-        if date.hour == 17 and date.minute >= 10 and date.minute <= 11 and f_once == False :
+        if (date.hour == 14 and date.minute >= 0 and date.minute <= 1) or (date.hour == 17 and date.minute >= 10 and date.minute <= 11) and f_once == False :
             root_logger.critical(f"[SAVED] Start Upload youtube Saved Files ... ")
             file_list = os.listdir(SAVED_DIR)
             file_list_ts = [file for file in file_list if file.endswith(".ts")]
@@ -363,7 +363,7 @@ def upload_saved() :
             f_once = True
             time.sleep(60)
         
-        if date.hour >= 18:
+        if date.hour >= 18 or ( date.hour == 17 and date.minute == 9) :
             f_once = False
 
         time.sleep(10)
