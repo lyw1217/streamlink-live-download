@@ -5,6 +5,7 @@ import time
 import datetime
 import os
 import smtplib
+import requests
 from email.message import EmailMessage
 
 from getconfig import *
@@ -483,7 +484,79 @@ def cut_video(video_path) :
         return cut_count + res
 
     return 0
-    
+
+# True : 토큰 갱신 필요(곧 expiry 됨), False : 토큰 갱신 미필요
+def get_token_info(OAUTH_PATH):
+    root_logger.critical("Get Google Youtube API Access Token Info.")
+        
+    with open(OAUTH_PATH, 'r', encoding='utf-8') as f :
+        data = json.load(f)
+        
+        params = dict()
+        params['client_id'] = data['client_id']
+        params['client_secret'] = data['client_secret']
+        params['access_token'] = data['access_token']
+
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        res = requests.post(data['token_info_uri'], params=params, headers=headers)
+        
+        json_res = res.json()
+        if json_res.get('expires_in') :
+            if int(json_res['expires_in']) < 120 :
+                root_logger.critical("Token has expired!")
+                return True
+            else :
+                return False
+        else :
+            return False
+            
+def refresh_token():
+    OAUTH_PATH = os.path.join(BASE_DIR, 'upload_youtube.py-oauth2.json')
+    try :
+        while True :
+            if get_token_info(OAUTH_PATH) :
+                root_logger.critical("Refresh Google Youtube API Access Token.")
+
+                f = open(OAUTH_PATH, 'r', encoding='utf-8')
+                data = json.load(f)
+            
+                params = dict()
+                params['client_id'] = data['client_id']
+                params['client_secret'] = data['client_secret']
+                params['refresh_token'] = data['refresh_token']
+                params['grant_type'] = 'refresh_token'
+
+                headers = {'content-type': 'application/x-www-form-urlencoded'}
+                res = requests.post(data['token_uri'], params=params, headers=headers)
+                
+                json_res = res.json()
+
+                if json_res.get('access_token') :
+                    data['access_token'] = json_res['access_token']
+                    data['token_response']['access_token'] = json_res['access_token']
+                    print("data['access_token'] = ", data['access_token'])
+                if json_res.get('refresh_token') :
+                    data['refresh_token'] = json_res['refresh_token']
+                    print("data['refresh_token'] = ", data['refresh_token'])
+                if json_res.get('expires_in') :
+                    data['expires_in'] = json_res['expires_in']
+                    data['token_response']['expires_in'] = json_res['expires_in']
+                    print("data['expires_in'] = ", data['expires_in'])
+
+                new_expiry = datetime.datetime.now() + datetime.timedelta(seconds=int(data['expires_in']))
+                data['token_expiry'] = datetime.datetime.strftime(new_expiry, '%Y-%m-%dT%H:%M:%SZ')
+
+                f.close()
+
+                with open(OAUTH_PATH, 'w', encoding='utf-8') as f :
+                    json.dump(data, f)
+                    print('Refresh Token End')
+
+            time.sleep(60)
+    except Exception as e :
+        root_logger.critical("Err. Failed refresh_token() : " + str(e) )
+
+
 if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
@@ -500,6 +573,7 @@ if __name__ == '__main__':
     create_dir(SAVED_DIR)
     executor.submit(check_stream)
     executor.submit(check_filesystem)
+    executor.submit(refresh_token)
     if PIPE_FLAG == True :
         create_pipe()
     upload_saved()
