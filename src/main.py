@@ -486,9 +486,7 @@ def cut_video(video_path) :
     return 0
 
 # True : 토큰 갱신 필요(곧 expiry 됨), False : 토큰 갱신 미필요
-def get_token_info(OAUTH_PATH):
-    root_logger.critical("Get Google Youtube API Access Token Info.")
-        
+def get_token_info(OAUTH_PATH):        
     with open(OAUTH_PATH, 'r', encoding='utf-8') as f :
         data = json.load(f)
         
