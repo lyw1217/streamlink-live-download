@@ -6,6 +6,7 @@ import datetime
 import os
 import smtplib
 import requests
+import schedule
 from email.message import EmailMessage
 
 from getconfig import *
@@ -327,47 +328,34 @@ def check_stream():
     return
 
 def upload_saved() :
-    root_logger.critical(f"[SAVED] Init upload saved ... ")
-    f_once = False
-    while True:
-        date = datetime.datetime.now()
+    root_logger.critical(f"[SAVED] Start Upload youtube Saved Files ... ")
+    file_list = os.listdir(SAVED_DIR)
+    file_list_ts = [file for file in file_list if file.endswith(".ts")]
 
-        if (date.hour == 14 and date.minute >= 0 and date.minute <= 1) or (date.hour == 17 and date.minute >= 10 and date.minute <= 11) and f_once == False :
-            root_logger.critical(f"[SAVED] Start Upload youtube Saved Files ... ")
-            file_list = os.listdir(SAVED_DIR)
-            file_list_ts = [file for file in file_list if file.endswith(".ts")]
+    for name in file_list_ts:
+        out = cmd_youtube_api(SAVED_DIR, name)
 
-            for name in file_list_ts:
-                out = cmd_youtube_api(SAVED_DIR, name)
-
-                if check_quota(out) :
-                    # 업로드 성공 시 파일 삭제
-                    root_logger.critical(f"[SAVED] Remove {SAVED_DIR}/{name}")
-                    os.remove(f"{SAVED_DIR}/{name}")
-                else :
-                    root_logger.critical(f"[SAVED] Err. Failed upload youtube, Wait 60 seconds and Retry")
-                    # 1분 제한 회피
-                    time.sleep(60)
-                    # 업로드 실패 시 재시도
-                    out = cmd_youtube_api(SAVED_DIR, name)
-
-                    if check_quota(out) :
-                        # 업로드 성공 시 파일 삭제
-                        root_logger.critical(f"[SAVED] RETRY Success upload youtube. Remove file")
-                        root_logger.critical(f"[SAVED] RETRY Remove {OUTPUT_DIR}/{name}")
-                        os.remove(f"{OUTPUT_DIR}/{name}")
-                    else :
-                        # 재시도 실패 시 로깅
-                        root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
-                        send_email("SAVED 유튜브 업로드 실패", f"파일명 : '{name}'\n SAVED에 저장된 파일 업로드 실패.\n Google API의 할당량을 확인하세요.\n 다른 동영상 다운로드를 위해 하드디스크의 여유 공간을 확보하세요.")
-
-            f_once = True
+        if check_quota(out) :
+            # 업로드 성공 시 파일 삭제
+            root_logger.critical(f"[SAVED] Remove {SAVED_DIR}/{name}")
+            os.remove(f"{SAVED_DIR}/{name}")
+        else :
+            root_logger.critical(f"[SAVED] Err. Failed upload youtube, Wait 60 seconds and Retry")
+            # 1분 제한 회피
             time.sleep(60)
-        
-        if date.hour >= 18 or ( date.hour == 17 and date.minute == 9) :
-            f_once = False
+            # 업로드 실패 시 재시도
+            out = cmd_youtube_api(SAVED_DIR, name)
 
-        time.sleep(10)
+            if check_quota(out) :
+                # 업로드 성공 시 파일 삭제
+                root_logger.critical(f"[SAVED] RETRY Success upload youtube. Remove file")
+                root_logger.critical(f"[SAVED] RETRY Remove {OUTPUT_DIR}/{name}")
+                os.remove(f"{OUTPUT_DIR}/{name}")
+            else :
+                # 재시도 실패 시 로깅
+                root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
+                send_email("SAVED 유튜브 업로드 실패", f"파일명 : '{name}'\n SAVED에 저장된 파일 업로드 실패.\n Google API의 할당량을 확인하세요.\n 다른 동영상 다운로드를 위해 하드디스크의 여유 공간을 확보하세요.")
+
 
 # https://codechacha.com/ko/python-file-or-dir-size/
 def get_dir_size(path='.'):
@@ -507,7 +495,8 @@ def get_token_info(OAUTH_PATH):
                 return False
         else :
             return False
-            
+
+# https://developers.google.com/youtube/v3/live/guides/auth/devices#OAuth2_Refreshing_a_Token
 def refresh_token():
     OAUTH_PATH = os.path.join(BASE_DIR, 'upload_youtube.py-oauth2.json')
     try :
@@ -574,4 +563,11 @@ if __name__ == '__main__':
     executor.submit(refresh_token)
     if PIPE_FLAG == True :
         create_pipe()
-    upload_saved()
+
+    root_logger.critical(f"[SAVED] Init upload saved ... ")
+    schedule.every().day.at("14:00").do(upload_saved)
+    schedule.every().day.at("17:05").do(upload_saved)
+    
+    while True :
+        schedule.run_pending()
+        time.sleep(10)
