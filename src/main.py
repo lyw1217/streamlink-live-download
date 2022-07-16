@@ -151,6 +151,7 @@ def cmd_youtube_api(dir, name) :
             '--privacyStatus',  "private"
             ], 
             stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+    # If your browser is on a different machine then exit and re-run this application with the command-line parameter '--noauth_local_webserver' 
     try:
         outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
     except Exception as e:
@@ -195,7 +196,7 @@ def upload_youtube(author, title, date):
     root_logger.critical(f'upload_youtube author={author}, title={title}, date={date}')
 
     file_list = os.listdir(OUTPUT_DIR)
-    file_list_ts = [file for file in file_list if file.endswith(".ts")]
+    file_list_ts = [file for file in file_list if file.endswith(".ts") or file.endswith(".mp4") or file.endswith(".m2ts")]
     
     match_flag = False
 
@@ -206,6 +207,8 @@ def upload_youtube(author, title, date):
 
             # file name format : "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
             file_date = datetime.datetime.strptime(name.split(']')[1][1:18], "%Y-%m-%d-%H%M%S")
+
+            root, ext = os.path.splitext(name)
 
             match_flag = False
 
@@ -229,17 +232,17 @@ def upload_youtube(author, title, date):
                     # 30시간까지 가능
                     root_logger.critical(f"Info. upload cutted video. ")
                     if cut_count == 2 :
-                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
-                        start_upload(author, f"{name.rstrip('.ts')}_2.ts")      # 6 ~ 18
+                        start_upload(author, f"{root}_1{ext}")      # 0 ~ 6
+                        start_upload(author, f"{root}_2{ext}")      # 6 ~ 18
                     elif cut_count == 4 :
-                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
-                        start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
-                        start_upload(author, f"{name.rstrip('.ts')}_2_2.ts")    # 12 ~ 24
+                        start_upload(author, f"{root}_1{ext}")      # 0 ~ 6
+                        start_upload(author, f"{root}_2_1{ext}")    # 6 ~ 12
+                        start_upload(author, f"{root}_2_2{ext}")    # 12 ~ 24
                     elif cut_count == 6 :
-                        start_upload(author, f"{name.rstrip('.ts')}_1.ts")      # 0 ~ 6
-                        start_upload(author, f"{name.rstrip('.ts')}_2_1.ts")    # 6 ~ 12
-                        start_upload(author, f"{name.rstrip('.ts')}_2_2_1.ts")  # 12 ~ 18
-                        start_upload(author, f"{name.rstrip('.ts')}_2_2_2.ts")  # 18 ~ 30
+                        start_upload(author, f"{root}_1{ext}")      # 0 ~ 6
+                        start_upload(author, f"{root}_2_1{ext}")    # 6 ~ 12
+                        start_upload(author, f"{root}_2_2_1{ext}")  # 12 ~ 18
+                        start_upload(author, f"{root}_2_2_2{ext}")  # 18 ~ 30
                     else :
                         send_email("유튜브 업로드 실패",
                         f"Title : {title}\nAuthor : {author}\nDate : {date}\n 파일 업로드 실패.\n 동영상을 자르는데 실패했습니다. 수동으로 자른 뒤 업로드해야 합니다.")
@@ -330,7 +333,7 @@ def check_stream():
 def upload_saved() :
     root_logger.critical(f"[SAVED] Start Upload youtube Saved Files ... ")
     file_list = os.listdir(SAVED_DIR)
-    file_list_ts = [file for file in file_list if file.endswith(".ts")]
+    file_list_ts = [file for file in file_list if file.endswith(".ts") or file.endswith(".mp4") or file.endswith(".m2ts")]
 
     for name in file_list_ts:
         out = cmd_youtube_api(SAVED_DIR, name)
@@ -431,7 +434,7 @@ def cut_video(video_path) :
     h = get_duration(video_path)
 
     if h >= 12 :
-        video_name = video_path.rstrip('.ts')
+        video_name, ext = os.path.splitext(video_path)
         cut_count = 0
         command = "which ffmpeg"
         p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
@@ -440,7 +443,7 @@ def cut_video(video_path) :
             root_logger.critical("Err. ffmpeg not installed..")
             return (-1)
         
-        command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 06:00:02 -c:v copy -c:a copy "{video_name}_1.ts"']
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -to 06:00:02 -c:v copy -c:a copy "{video_name}_1{ext}"']
         root_logger.critical("cut video 00:00:00 ~ 06:00:02 start")
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
@@ -453,7 +456,7 @@ def cut_video(video_path) :
             
         
         root_logger.critical("cut video 05:59:58 ~ EOF start")
-        command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_name}_2.ts"']
+        command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_name}_2{ext}"']
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
             outs = p.communicate(timeout=7200)
@@ -463,7 +466,7 @@ def cut_video(video_path) :
             root_logger.critical("Err. cut_video()" + str(e))
             return (-1)
 
-        res = cut_video(f"{video_name}_2.ts")
+        res = cut_video(f"{video_name}_2{ext}")
         if res < 0 :
             root_logger.critical("Err. Failed Cut Video")
             return (-1)
