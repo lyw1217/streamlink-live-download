@@ -1,6 +1,8 @@
 #-*- coding:utf-8 -*-
+from concurrent.futures import thread
 import subprocess as sp
 import concurrent.futures as cf
+import threading
 import time
 import datetime
 import os
@@ -12,7 +14,7 @@ from email.message import EmailMessage
 from getconfig import *
 from pipe import *
 
-executor = cf.ThreadPoolExecutor(max_workers=32)
+#executor = cf.ThreadPoolExecutor(max_workers=32)
 
 def send_email(subject, content):
     # 이메일 주소 미설정 시 메일 전송기능 OFF
@@ -276,7 +278,9 @@ def start_streamlink(streamer, url):
         author, title = get_stream_info(streamer, url)
 
         if author != '' and title != '':
-            executor.submit(start_mining, url=url)
+            #executor.submit(start_mining, url=url)
+            t1 = threading.Thread(target=start_mining, args=(url,))
+            t1.start()
             time.sleep(1)
 
             args = list()
@@ -299,10 +303,14 @@ def start_streamlink(streamer, url):
 
             sp.call(args)
             
-            executor.submit(stop_mining, author=author)
+            #executor.submit(stop_mining, author=author)
+            t2 = threading.Thread(target=stop_mining, args=(author,))
+            t2.start()
             #time.sleep(5)
 
-            executor.submit(upload_youtube, author=author, title=title, date=date)
+            #executor.submit(upload_youtube, author=author, title=title, date=date)
+            t3 = threading.Thread(target=upload_youtube, args=(author, title, date,))
+            t3.start()
             i = 0
 
         author = ''
@@ -325,7 +333,9 @@ def check_stream():
 
             # split url (https://www.twitch.tv/)
             name = url[22:].strip()
-            executor.submit(start_streamlink, streamer=name, url=url)
+            #executor.submit(start_streamlink, streamer=name, url=url)
+            t = threading.Thread(target=start_streamlink, args=(name, url,))
+            t.start()
             time.sleep(2)
 
     return
@@ -561,9 +571,15 @@ if __name__ == '__main__':
     
     create_dir(OUTPUT_DIR)
     create_dir(SAVED_DIR)
-    executor.submit(check_stream)
-    executor.submit(check_filesystem)
-    executor.submit(refresh_token)
+    #executor.submit(check_stream)
+    t1 = threading.Thread(target=check_stream)
+    t1.start()
+    #executor.submit(check_filesystem)
+    t2 = threading.Thread(target=check_filesystem)
+    t2.start()
+    #executor.submit(refresh_token)
+    t3 = threading.Thread(target=refresh_token)
+    t3.start()
     if PIPE_FLAG == True :
         create_pipe()
 
