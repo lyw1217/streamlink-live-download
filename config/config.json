@@ -12,5 +12,5 @@
   "UPLOAD_YOUTUBE_PY": "/home/leeyw/Documents/github/streamlink-live-download/src/upload_youtube.py",
   "PYTHON_CMD": "/home/leeyw/Documents/github/streamlink-live-download/.venv/bin/python",
   "SAVED_DIR": "/home/leeyw/mnt/Twitch/recordings/saved",
-  "PIPE_FLAG": true
+  "PIPE_FLAG": false
 }

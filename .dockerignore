@@ -1,7 +1,6 @@
-scripts
 *.md
 logs/*.log
 .git
 .gitignore
 __pycache__
-venv
+.venv
