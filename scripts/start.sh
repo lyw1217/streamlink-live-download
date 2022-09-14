@@ -20,7 +20,7 @@ if [ ! -d "../logs" ] ; then
  mkdir -p ./logs
 fi
 
-/usr/bin/nohup /home/ubuntu/Documents/github/streamlink-live-download/scripts/record.sh $CMD >> ../logs/nohup.log &
+/usr/bin/nohup /home/leeyw/Documents/github/streamlink-live-download/scripts/record.sh $CMD >> ../logs/nohup.log &
 
 dot="...."
 for i in 3 2 1

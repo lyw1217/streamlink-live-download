@@ -1,5 +1,5 @@
 #!/bin/bash
-HOME="/home/ubuntu"
+HOME="/home/leeyw"
 ROOT_DIR="${HOME}/Documents/github/streamlink-live-download"
 STREAMLINK="${ROOT_DIR}/venv/bin/streamlink"
 TARGET="${ROOT_DIR}/target_url.txt"

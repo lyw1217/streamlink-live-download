@@ -8,7 +8,7 @@
 VIDEO_PATH="${HOME}/mnt/Twitch/recordings/saved"
 
 # 가상 환경 진입
-. ${HOME}/Documents/github/streamlink-live-download/venv/bin/activate
+. ${HOME}/Documents/github/streamlink-live-download/.venv/bin/activate
 
 PROGRAM="python"
 CMD=`command -v ${PROGRAM} 2>/dev/null`

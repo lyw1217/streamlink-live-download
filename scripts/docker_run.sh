@@ -2,7 +2,7 @@
 
 DOCKER=`which docker`
 
-PYSTREAM_HOME="/home/ubuntu/Documents/github/streamlink-live-download"
+PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download"
 
 HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt"
 CONTAINER_TARGET_URI="/app/target_url.txt"
@@ -13,10 +13,10 @@ CONTAINER_CONFIG="/app/config/config.json"
 HOST_LOG_DIR="${PYSTREAM_HOME}/logs"
 CONTAINER_LOG_DIR="/app/logs"
 
-HOST_OUTPUT_DIR="/home/ubuntu/mnt/Twitch/recordings"
+HOST_OUTPUT_DIR="/home/leeyw/mnt/Twitch/recordings"
 CONTAINER_OUTPUT_DIR="/mnt/recordings"
 
-HOST_SAVED_DIR="/home/ubuntu/mnt/Twitch/recordings/saved"
+HOST_SAVED_DIR="/home/leeyw/mnt/Twitch/recordings/saved"
 CONTAINER_SAVED_DIR="/mnt/recordings/saved"
 
 HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream"
