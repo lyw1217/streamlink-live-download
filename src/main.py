@@ -346,6 +346,7 @@ def upload_saved() :
     file_list_ts = [file for file in file_list if file.endswith(".ts") or file.endswith(".mp4") or file.endswith(".m2ts")]
 
     for name in file_list_ts:
+        root_logger.critical(f"[SAVED] Try upload > {SAVED_DIR}/{name}")
         out = cmd_youtube_api(SAVED_DIR, name)
 
         if check_quota(out) :
@@ -534,14 +535,14 @@ def refresh_token():
                 if json_res.get('access_token') :
                     data['access_token'] = json_res['access_token']
                     data['token_response']['access_token'] = json_res['access_token']
-                    print("data['access_token'] = ", data['access_token'])
+                    #print("data['access_token'] = ", data['access_token'])
                 if json_res.get('refresh_token') :
                     data['refresh_token'] = json_res['refresh_token']
-                    print("data['refresh_token'] = ", data['refresh_token'])
+                    #print("data['refresh_token'] = ", data['refresh_token'])
                 if json_res.get('expires_in') :
                     data['expires_in'] = json_res['expires_in']
                     data['token_response']['expires_in'] = json_res['expires_in']
-                    print("data['expires_in'] = ", data['expires_in'])
+                    #print("data['expires_in'] = ", data['expires_in'])
 
                 new_expiry = datetime.datetime.now() + datetime.timedelta(seconds=int(data['expires_in']))
                 data['token_expiry'] = datetime.datetime.strftime(new_expiry, '%Y-%m-%dT%H:%M:%SZ')
@@ -550,7 +551,7 @@ def refresh_token():
 
                 with open(OAUTH_PATH, 'w', encoding='utf-8') as f :
                     json.dump(data, f)
-                    print('Refresh Token End')
+                    #print('Refresh Token End')
 
             time.sleep(60)
     except Exception as e :
