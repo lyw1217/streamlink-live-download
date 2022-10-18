@@ -155,7 +155,7 @@ def cmd_youtube_api(dir, name) :
             stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
     # If your browser is on a different machine then exit and re-run this application with the command-line parameter '--noauth_local_webserver' 
     try:
-        outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
+        outs = p.communicate(timeout=14400) # 4시간 동안 업로드하지 못했으면 timeout 처리
     except Exception as e:
         p.kill()
         outs = p.communicate()
@@ -458,7 +458,7 @@ def cut_video(video_path) :
         root_logger.critical("cut video 00:00:00 ~ 06:00:02 start")
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-            outs = p.communicate(timeout=7200)
+            outs = p.communicate(timeout=10800)
             root_logger.critical(outs[0])
             cut_count += 1
         except Exception as e :
@@ -470,7 +470,7 @@ def cut_video(video_path) :
         command = [rf'{ffmpeg_cmd} -i "{video_path}" -ss 05:59:58 -c:v copy -c:a copy "{video_name}_2{ext}"']
         try:
             p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-            outs = p.communicate(timeout=7200)
+            outs = p.communicate(timeout=10800)
             root_logger.critical(outs[0])
             cut_count += 1
         except Exception as e :
