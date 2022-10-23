@@ -119,6 +119,8 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'PYTHON_CMD = {PYTHON_CMD}')
             SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
             root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
+            UPLOADED_DIR = os.getenv("UPLOADED_DIR", "/mnt/recordings/uploaded")
+            root_logger.critical(f'UPLOADED_DIR = {UPLOADED_DIR}')
             WARN_USAGE = configs['WARN_USAGE']
             root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
             PIPE_FLAG = configs["PIPE_FLAG"]
@@ -157,6 +159,12 @@ else :
             except KeyError :
                 SAVED_DIR = os.getenv("SAVE_DIR", "/mnt/recordings/saved")
             root_logger.critical(f'SAVED_DIR = {SAVED_DIR}')
+
+            try :
+                UPLOADED_DIR = configs['UPLOADED_DIR']
+            except KeyError :
+                UPLOADED_DIR = os.getenv("UPLOADED_DIR", "/mnt/recordings/uploaded")
+            root_logger.critical(f'UPLOADED_DIR = {UPLOADED_DIR}')
 
             try :
                 FILE_RULE = configs['FILE_RULE']

@@ -172,7 +172,9 @@ def start_upload(author, name):
     if check_quota(out) :
         # 업로드 성공 시 파일 삭제
         root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
-        os.remove(f"{OUTPUT_DIR}/{name}")
+        #os.remove(f"{OUTPUT_DIR}/{name}")
+        # 업로드 성공 시 파일 이동
+        os.replace(f"{OUTPUT_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
     else :
         root_logger.critical(f"Err. Failed upload youtube, Wait 60 seconds and Retry")
         # 1분 제한 회피
@@ -185,7 +187,9 @@ def start_upload(author, name):
             # 업로드 성공 시 파일 삭제
             root_logger.critical(f"RETRY Success upload youtube. Remove file")
             root_logger.critical(f"RETRY Remove {OUTPUT_DIR}/{name}")
-            os.remove(f"{OUTPUT_DIR}/{name}")
+            #os.remove(f"{OUTPUT_DIR}/{name}")
+            # 업로드 성공 시 파일 이동
+            os.replace(f"{OUTPUT_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
         else :
             # 재시도 실패 시 임시 저장
             root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
@@ -352,7 +356,9 @@ def upload_saved() :
         if check_quota(out) :
             # 업로드 성공 시 파일 삭제
             root_logger.critical(f"[SAVED] Remove {SAVED_DIR}/{name}")
-            os.remove(f"{SAVED_DIR}/{name}")
+            #os.remove(f"{SAVED_DIR}/{name}")
+            # 업로드 성공 시 파일 이동
+            os.replace(f"{SAVED_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
         else :
             root_logger.critical(f"[SAVED] Err. Failed upload youtube, Wait 60 seconds and Retry")
             # 1분 제한 회피
@@ -364,7 +370,9 @@ def upload_saved() :
                 # 업로드 성공 시 파일 삭제
                 root_logger.critical(f"[SAVED] RETRY Success upload youtube. Remove file")
                 root_logger.critical(f"[SAVED] RETRY Remove {OUTPUT_DIR}/{name}")
-                os.remove(f"{OUTPUT_DIR}/{name}")
+                #os.remove(f"{OUTPUT_DIR}/{name}")
+                # 업로드 성공 시 파일 이동
+                os.replace(f"{SAVED_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
             else :
                 # 재시도 실패 시 로깅
                 root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
@@ -572,6 +580,7 @@ if __name__ == '__main__':
     
     create_dir(OUTPUT_DIR)
     create_dir(SAVED_DIR)
+    create_dir(UPLOADED_DIR)
     #executor.submit(check_stream)
     t1 = threading.Thread(target=check_stream)
     t1.start()
