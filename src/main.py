@@ -17,6 +17,7 @@ from pipe import *
 #executor = cf.ThreadPoolExecutor(max_workers=32)
 
 def send_email(subject, content):
+    '''
     # 이메일 주소 미설정 시 메일 전송기능 OFF
     if len(FROM_EMAIL_ADDR) == 0 or len(TO_EMAIL_ADDR) == 0 :
         return 
@@ -36,6 +37,7 @@ def send_email(subject, content):
     s.send_message(msg)
     s.quit()
     root_logger.critical("Send Email Complete")
+    '''
 
 
 def create_dir(directory):
@@ -64,6 +66,8 @@ def start_mining(url):
             p = sp.Popen(['google-chrome-stable', url, '--new-window'], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
             out = p.communicate()[0]
             root_logger.critical(out)
+    
+    return
 
 # 채굴 종료
 def stop_mining(author):
@@ -85,6 +89,8 @@ def stop_mining(author):
             else :    
                 root_logger.critical(f"tab = {tab}")
                 p = sp.Popen(['wmctrl', '-c', rf"{tab}"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+    
+    return
 
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
@@ -103,8 +109,13 @@ def get_stream_info(streamer, url):
     pipe = sp.Popen(
         args, stdout=sp.PIPE
     )
-    # https://purplechip.tistory.com/1
-    text = pipe.communicate()[0]
+    try:
+        # https://purplechip.tistory.com/1
+        text = pipe.communicate(timeout=60)[0]
+    except Exception as e:
+        pipe.kill()
+        root_logger.critical(e)
+        return "",""
 
     dict = json.loads(text)
     for key, val in dict.items():
@@ -274,52 +285,61 @@ def start_streamlink(streamer, url):
     i = 0
 
     while True:
-        if i % 100 == 0 :
-            root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}'")
-            i = 0
-        i += 1
+        try:
+            #if i % 100 == 0 :
+            #    root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
+            #    i = 0
+            i += 1
+            root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
+    
+            author, title = get_stream_info(streamer, url)
+    
+            if author != '' and title != '':
+                #executor.submit(start_mining, url=url)
+                t1 = threading.Thread(target=start_mining, args=(url,))
+                t1.start()
+                time.sleep(1)
+    
+                args = list()
+                opts = list()
+    
+                opts.append('--output')
+                opts.append(f'{OUTPUT_DIR}/{FILE_RULE}')
+                opts += f'{STREAMLINK_OPTIONS}'.split(' ')
+                opts.append('--loglevel')
+                opts.append(f'{STREAMLINK_LOG_OPTIONS}')
+                opts.append('--logfile')
+                opts.append(f'{STREAMLINK_LOG_PATH}_{streamer}.log')
+                opts.append(f'{url}')
+                opts.append(f'{QUALITY}')
+    
+                args.append(STREAMLINK_CMD)
+                args += opts
+                
+                date = datetime.datetime.now()
+                try:
+                    ps = sp.call(args)
+                except Exception as e:
+                    outs = ps.communicate()
+                    root_logger.critical(f"Exception: {e}")
+                    root_logger.critical(f"communicate : {outs[0]}")
+    
+                #executor.submit(stop_mining, author=author)
+                t2 = threading.Thread(target=stop_mining, args=(author,))
+                t2.start()
+                #time.sleep(5)
+    
+                #executor.submit(upload_youtube, author=author, title=title, date=date)
+                t3 = threading.Thread(target=upload_youtube, args=(author, title, date,))
+                t3.start()
+                i = 0
+    
+            author = ''
+            title = ''
+            time.sleep(INTERVAL)
 
-        author, title = get_stream_info(streamer, url)
-
-        if author != '' and title != '':
-            #executor.submit(start_mining, url=url)
-            t1 = threading.Thread(target=start_mining, args=(url,))
-            t1.start()
-            time.sleep(1)
-
-            args = list()
-            opts = list()
-
-            opts.append('--output')
-            opts.append(f'{OUTPUT_DIR}/{FILE_RULE}')
-            opts += f'{STREAMLINK_OPTIONS}'.split(' ')
-            opts.append('--loglevel')
-            opts.append(f'{STREAMLINK_LOG_OPTIONS}')
-            opts.append('--logfile')
-            opts.append(f'{STREAMLINK_LOG_PATH}_{streamer}.log')
-            opts.append(f'{url}')
-            opts.append(f'{QUALITY}')
-
-            args.append(STREAMLINK_CMD)
-            args += opts
-            
-            date = datetime.datetime.now()
-
-            sp.call(args)
-            
-            #executor.submit(stop_mining, author=author)
-            t2 = threading.Thread(target=stop_mining, args=(author,))
-            t2.start()
-            #time.sleep(5)
-
-            #executor.submit(upload_youtube, author=author, title=title, date=date)
-            t3 = threading.Thread(target=upload_youtube, args=(author, title, date,))
-            t3.start()
-            i = 0
-
-        author = ''
-        title = ''
-        time.sleep(INTERVAL)
+        except Exception as e:
+            root_logger.critical(f"Exception: {e}")
 
     return
 
