@@ -1,15 +1,18 @@
-FROM python:3.8-slim
+FROM python:3.8-slim-buster
 LABEL maintainer="mvl100d@gmail.com"
 ARG RUNTIME_DIR=/app
 ARG OUTPUT_DIR=/mnt/recordings
 ARG SAVED_DIR=/mnt/recordings/saved
 
-RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list
-RUN apt update \
-	&& apt install -y software-properties-common
-RUN apt update \ 
-	&& apt install -y --reinstall locales && dpkg-reconfigure locales
-RUN locale-gen ko_KR.UTF-8
+#RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list
+RUN apt-get update \
+	&& apt-get install -y apt-utils software-properties-common
+RUN apt-get update \ 
+	&& apt-get install -y --reinstall locales procps vim ffmpeg \
+	&& locale-gen ko_KR.UTF-8 \
+	&& dpkg-reconfigure --frontend=noninteractive locales 
+RUN localedef -f UTF-8 -i ko_KR ko_KR.UTF-8
+
 RUN mkdir -p $RUNTIME_DIR/src \ 
 			 $OUTPUT_DIR \ 
 			 $SAVED_DIR
@@ -21,17 +24,23 @@ ENV IS_CONTAINER="True" \
     NAME=${NAME} \
 	LANG="ko_KR.UTF-8" \
 	LANGUAGE="ko_KR.UTF-8" \
-	LC_ALL="ko_KR.utf8" \
+	LC_ALL="ko_KR.UTF-8" \
 	TZ=Asia/Seoul
 
 WORKDIR $RUNTIME_DIR
-COPY . .
 
+COPY . .
+COPY run.sh ..
 RUN pip install -r ./requirements.txt
 
-RUN pip install httplib2 uritemplate pyopenssl WebTest wheel apiclient \
-	pip install --upgrade oauth2client \
-	pip install --upgrade google-api-python-client \
-	pip install --upgrade streamlink
+#RUN pip install --upgrade httplib2 uritemplate pyopenssl WebTest wheel apiclient \
+#	pip install --upgrade oauth2client \
+#	pip install --upgrade google-api-python-client \
+#	pip install --upgrade streamlink
 
-ENTRYPOINT [ "python", "./src/main.py" ]
+WORKDIR ..
+RUN tar -cvf app.tar ./app
+
+WORKDIR $RUNTIME_DIR
+
+ENTRYPOINT /run.sh -c
