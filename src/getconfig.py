@@ -232,6 +232,7 @@ else :
             except KeyError :
                 WARN_USAGE = 70
             root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
+            
             PIPE_FLAG = False
             root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
     else :
@@ -257,6 +258,16 @@ if os.path.isfile(SECRETS_PATH):
             TO_EMAIL_ADDR = sec['TO_EMAIL_ADDR']
         except KeyError :
             root_logger.critical(f"No mail Address in {SECRETS_PATH}. Don't send email")
+        try :
+            SLACK_CHANNEL = configs["SLACK_CHANNEL"]
+            root_logger.critical(f'SLACK_CHANNEL = {SLACK_CHANNEL}')
+        except KeyError :
+            SLACK_CHANNEL = "streamlink-alarm"
+        try :
+            SLACK_KEY = sec['SLACK_KEY']
+            root_logger.critical(f'Loaded SLACK_KEY')
+        except KeyError :
+            root_logger.critical(f"No SLACK KEY.")
 else :
     root_logger.critical(f"No {SECRETS_PATH}. Don't send email")
     
