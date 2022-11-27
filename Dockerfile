@@ -40,7 +40,7 @@ RUN pip install -r ./requirements.txt
 
 WORKDIR ..
 RUN tar -cvf app.tar ./app
-
+RUN mkdir -p /app/logs
 WORKDIR $RUNTIME_DIR
 
-ENTRYPOINT /run.sh -c
+ENTRYPOINT /run.sh -c 2>&1 | tee -a /app/logs/run.log
