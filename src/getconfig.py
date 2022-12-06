@@ -23,20 +23,14 @@ SYS_PLATFORM = platform.system()
 create_log_dir(os.path.join(ROOT_DIR, 'logs'))
 
 ''' Logging Configuration '''
-if SYS_PLATFORM == 'Windows':
-    LOGGING_PATH = os.path.join(ROOT_DIR, r'config\logging.json')
-else :
-    LOGGING_PATH = os.path.join(ROOT_DIR, 'config/logging.json')
+LOGGING_PATH = os.path.join(ROOT_DIR, 'config', 'logging.json')
 
 if os.path.isfile(LOGGING_PATH):
     with open(LOGGING_PATH) as json_file:
         log_configs = json.load(json_file)
         try :
             log_filename = log_configs ['handlers']['file']['filename']
-            if SYS_PLATFORM == 'Windows':
-                log_configs ['handlers']['file']['filename'] = os.path.join(ROOT_DIR, fr'logs\{log_filename}')
-            else :
-                log_configs ['handlers']['file']['filename'] = os.path.join(ROOT_DIR, f'logs/{log_filename}')
+            log_configs ['handlers']['file']['filename'] = os.path.join(ROOT_DIR, 'logs', log_filename)
         except Exception :
             print("failed to load logging.json")
             sys.exit()
@@ -69,10 +63,7 @@ else :
 
 
 ''' Main Configuration '''
-if SYS_PLATFORM == 'Windows':
-    CONFIG_PATH = os.path.join(ROOT_DIR, r'config\config.json')
-else :
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.json')
+CONFIG_PATH = os.path.join(ROOT_DIR, 'config', 'config.json')
 
 IS_CONTAINER = os.getenv("IS_CONTAINER", "")
 # container 인 경우
@@ -241,10 +232,7 @@ else :
 
 
 ''' Private Configuration '''
-if SYS_PLATFORM == 'Windows':
-    SECRETS_PATH = os.path.join(ROOT_DIR, r'config\secrets.json')
-else :
-    SECRETS_PATH = os.path.join(ROOT_DIR, 'config/secrets.json')
+SECRETS_PATH = os.path.join(ROOT_DIR, 'config', 'secrets.json')
 
 FROM_EMAIL_ADDR = ""
 TO_EMAIL_ADDR = ""
@@ -274,12 +262,8 @@ else :
 
 
 ''' Youtube Upload Secrets '''
-if SYS_PLATFORM == 'Windows':
-    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, r'src\client_secrets.json')
-    OAUTH_PATH = os.path.join(ROOT_DIR, r'src\upload_youtube.py-oauth2.json')
-else :
-    CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src/client_secrets.json')
-    OAUTH_PATH = os.path.join(ROOT_DIR, 'src/upload_youtube.py-oauth2.json')
+CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src', 'client_secrets.json')
+OAUTH_PATH = os.path.join(ROOT_DIR, 'src', 'upload_youtube.py-oauth2.json')
 
 if os.path.isfile(CLIENT_SEC_PATH) == False :
     root_logger.critical(f"No client_secrets.json. check volumn")
