@@ -5,12 +5,12 @@ class SlackAPI:
     """
     슬랙 API 핸들러
     """
-    def __init__(self, token):
+    def __init__(self, token:str):
         # 슬랙 클라이언트 인스턴스 생성
         self.client = WebClient(token)
         self.channel_id = ""
         
-    def get_channel_id(self, channel_name):
+    def get_channel_id(self, channel_name:str):
         """
         슬랙 채널ID 조회
         """
@@ -24,7 +24,7 @@ class SlackAPI:
         channel_id = channel["id"]
         return channel_id
 
-    def get_message_ts(self, channel_id, query):
+    def get_message_ts(self, channel_id:str, query:str):
         """
         슬랙 채널 내 메세지 조회
         """
@@ -38,7 +38,34 @@ class SlackAPI:
         message_ts = message["ts"]
         return message_ts
 
-    def post_thread_message(self, channel_id, message_ts, text):
+    def get_last_message(self, channel_id:str):
+        """
+        슬랙 채널 내 마지막 메세지 조회
+        """
+        # conversations_history() 메서드 호출
+        result = self.client.conversations_history(channel=channel_id, inclusive=True, limit=1)
+        # 채널 내 메세지 정보 딕셔너리 리스트
+        message = result.data['messages'][0]
+
+        return message
+
+    def get_thread_latest_message(self, channel_id:str, message_ts:str):
+        """
+        슬랙 채널 내 메세지의 Thread에서 메시지 조회
+        """
+        # chat_postMessage() 메서드 호출
+        result = self.client.conversations_replies(
+            channel=channel_id,
+            ts = message_ts,
+            inclusive=True,
+            limit=1
+        )
+
+        message = result["messages"][0]
+        
+        return message["text"]
+
+    def post_thread_message(self, channel_id:str, message_ts:str, text:str):
         """
         슬랙 채널 내 메세지의 Thread에 댓글 달기
         """
@@ -50,7 +77,7 @@ class SlackAPI:
         )
         return result
     
-    def post_message(self, channel_id, text):
+    def post_message(self, channel_id:str, text: str):
         """
         슬랙 채널 내 메시지 보내기
         """

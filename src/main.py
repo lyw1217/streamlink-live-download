@@ -3,6 +3,7 @@ from concurrent.futures import thread
 import subprocess as sp
 import concurrent.futures as cf
 import threading
+from threading import Timer
 import time
 import datetime
 import os
@@ -10,12 +11,15 @@ import smtplib
 import requests
 import schedule
 from email.message import EmailMessage
+from urllib import parse
 
 from getconfig import *
 from pipe import *
 from slack import *
 
 #executor = cf.ThreadPoolExecutor(max_workers=32)
+
+upload_code = {}
 
 def send_email(subject, content):
     '''
@@ -40,25 +44,64 @@ def send_email(subject, content):
     root_logger.critical("Send Email Complete")
     '''
 
-def init_slack_channel(channel_name):
+def init_slack_channel(channel_name: str):
     try:
         s = SlackAPI(SLACK_KEY)
         s.channel_id = s.get_channel_id(channel_name)
         root_logger.critical(f"Initialize Slack > channel_id = {s.channel_id}")
-    except Exception:
-        root_logger.critical(f"Failed init slack > channel_name = {channel_name}")
+    except Exception as e:
+        root_logger.critical(f"Failed init slack > channel_name = {channel_name}, err = {e}")
 
     return s
 
-def post_slack_message(s, text):
+def post_slack_message(s: SlackAPI, text: str):
     if len(s.channel_id) > 0 :
         try :
             res = s.post_message(s.channel_id, text)
             root_logger.critical("Send Slack Message : " + text)
-        except Exception:
-            root_logger.critical(f"Failed Send Slack Message > id : {s.channel_id}, text : " + text)
+        except Exception as e:
+            root_logger.critical(f"Failed Send Slack Message > id : {s.channel_id}, text : {text}, err = {e}")
             res = ""
     return res
+
+def get_slack_last_message(s: SlackAPI):
+    if len(s.channel_id) > 0 :
+        try :
+            msg = s.get_last_message(s.channel_id)
+            return msg
+        except Exception as e:
+            root_logger.critical(f"Failed Get Slack Message > id : {s.channel_id}, err = {e}")
+            return None
+
+def get_code_by_slack(p: sp.Popen[str], s: SlackAPI, key: str):
+    root_logger.critical("Init get code by slack thread...")
+    global upload_code
+    i = 0
+    while True:
+        i += 1
+        if i > 239 : # 7200초 - 30초
+            break
+        try:
+            message = get_slack_last_message(slack)
+            
+            if message != None and message["text"].startswith("auth") :
+                if "latest_reply" in message :
+                    upload_code[key] = s.get_thread_latest_message(s.channel_id, message['latest_reply'])
+                    root_logger.critical(f"GET Youtube API Code = {upload_code[key]}")
+
+                    root_logger.critical(f"code = {upload_code[key]}")
+                    p_out = p.communicate(input=upload_code[key])[0]
+                    post_slack_message(slack, f"Youtube API Token Refresh. out = {p_out}")
+                    return
+
+        except Exception as e:
+            root_logger.critical(f"Failed get_code_by_slack err = {e}")
+            return
+        
+        time.sleep(30)
+
+    return
+
 
 slack = init_slack_channel(SLACK_CHANNEL)
 
@@ -72,8 +115,8 @@ def create_dir(directory):
         sys.exit()
 
 command = "which google-chrome-stable"
-p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
-CHROME_CMD = p.communicate()[0].rstrip()
+chk_chrome = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+CHROME_CMD = chk_chrome.communicate()[0].rstrip()
 if "google-chrome-stable" not in CHROME_CMD :
     root_logger.critical("Info. google-chrome-stable not installed.. Don't Mine")
 
@@ -136,10 +179,11 @@ def get_stream_info(streamer, url):
 
     args.append(STREAMLINK_CMD)
     args += opts
+
+    pipe = sp.Popen(
+        args, stdout=sp.PIPE
+    )
     try:
-        pipe = sp.Popen(
-            args, stdout=sp.PIPE
-        )
         # https://purplechip.tistory.com/1
         text = pipe.communicate(timeout=60)[0]
     except Exception as e:
@@ -185,10 +229,10 @@ def check_quota(str):
     
     return False
 
-def cmd_youtube_api(dir, name) :
+def cmd_youtube_api(dir:str, name:str) :
     try:
         if len(IS_CONTAINER) > 0 :
-            cmd = [PYTHON_CMD, UPLOAD_YOUTUBE_PY,
+            cmd = [PYTHON_CMD, '-u', UPLOAD_YOUTUBE_PY,
             '--file',            f'{dir}/{name}',
             '--title',          f'{name}',
             '--description',    f'{name}',
@@ -206,19 +250,48 @@ def cmd_youtube_api(dir, name) :
             ]
         p = sp.Popen(
             cmd,
-            stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True
+            stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True
         )
+
+        timer = Timer(7200, p.kill)
+        out = ""
+        hash_key = hash(name) % 100000000
+        global upload_code
+        try :
+            timer.start()
+            while p.poll() == None:
+                line = p.stdout.readline()
+                out += line
+
+                if "http" in line:
+                    line = line.strip('\n').strip()
+                    root_logger.critical(f"유튜브 토큰 만료. slack 채널에 'auth' 메시지를 전송하고 아래 링크로 발급받은 코드를 댓글로 남겨주세요.\n<{line}>")
+                    post_slack_message(slack, f"유튜브 토큰 만료. slack 채널에 'auth' 메시지를 전송하고 아래 링크로 발급받은 코드를 댓글로 남겨주세요.")
+                    post_slack_message(slack, f"<{line}>")
+                    t = threading.Thread(target=get_code_by_slack,args=(p, slack,hash_key,))
+                    t.start()
+                else:
+                    root_logger.critical(f"cmd_youtube_api({name}) STDOUT : '{out}'")
+        finally:
+            timer.cancel()
         # If your browser is on a different machine then exit and re-run this application with the command-line parameter '--noauth_local_webserver' 
-        outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
+        #outs = p.communicate(timeout=7200) # 2시간 동안 업로드하지 못했으면 timeout 처리
+
+        return out
+
     except Exception as e:
         p.kill()
         outs = p.communicate()
-        root_logger.critical(e)
-        root_logger.critical(outs)
+        root_logger.critical(f"err = {repr(e)}")
+        root_logger.critical(f"outs = {outs}")
         post_slack_message(slack, f"유튜브 업로드 중 실패. 토큰이 만료되었을 수 있습니다. > {e}\n\n{outs}")
+        root_logger.critical(outs[0])
+
+        return outs[0]
     
-    root_logger.critical(outs[0])
-    return outs[0]
+    return ""
+    
+    
 
 
 def start_upload(author, name):
@@ -465,9 +538,9 @@ def get_dir_size(path='.'):
     return total // (1024 * 1024 * 1024)
 
 def get_filesystem_use():
-    pipe = sp.Popen("df -h | grep -v '100%' | grep -v 'Use'| awk '{print $5}'", shell=True, text=True, stdout=sp.PIPE)
+    p = sp.Popen("df -h | grep -v '100%' | grep -v 'Use'| awk '{print $5}'", shell=True, text=True, stdout=sp.PIPE)
 
-    result = pipe.stdout.read().split('\n')[:-1]
+    result = p.stdout.read().split('\n')[:-1]
     uses = list()
     for r in result :
         r = r.strip()
@@ -667,10 +740,10 @@ if __name__ == '__main__':
     if PIPE_FLAG == True :
         create_pipe()
 
-    root_logger.critical(f"[SAVED] Init upload saved ... ")
     schedule.every().day.at("14:00").do(upload_saved)
     schedule.every().day.at("17:05").do(upload_saved)
-    
+    upload_saved()
+    root_logger.critical(f"[SAVED] Init upload saved ... ")
     while True :
         schedule.run_pending()
         time.sleep(10)
