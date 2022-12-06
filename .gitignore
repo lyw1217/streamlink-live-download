@@ -199,3 +199,5 @@ logs/*
 *.py-oauth2.json
 *secrets.json
 fifo-pystream
+
+.DS_Store
