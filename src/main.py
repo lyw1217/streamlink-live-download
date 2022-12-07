@@ -73,7 +73,7 @@ def get_slack_last_message(s: SlackAPI):
             root_logger.critical(f"Failed Get Slack Message > id : {s.channel_id}, err = {e}")
             return None
 
-def get_code_by_slack(p: sp.Popen[str], s: SlackAPI, key: str):
+def get_code_by_slack(p, s: SlackAPI, key: str):
     root_logger.critical("Init get code by slack thread...")
     global upload_code
     i = 0
