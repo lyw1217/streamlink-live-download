@@ -6,15 +6,25 @@ while (( "$#" )); do
 		-c|--container)
 			echo "cd /"
 			cd /
-			echo "/bin/tar -xvf ./app.tar"
-			/bin/tar -xvf ./app.tar
-
+			URL=/app/target_url.txt
+			SRC=/app/src/main.py
+			if [ -f "$URL" ] && [ -f "$SRC" ]; then  
+				echo "$URL, $SRC exist "
+			else
+				echo "/bin/tar -xvf ./app.tar"
+				/bin/tar -xvf ./app.tar
+			fi
+			
 			echo "cd /app"
 			cd /app
 			echo "IS_CONTAINER=true"
 			IS_CONTAINER=true
 			shift
 			;;
+		-*|--*)
+            echo "Unsupported flag: $1"
+            exit 1
+            ;;
 	esac
 done
 
