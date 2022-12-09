@@ -63,9 +63,7 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
 6. oauth 인증(브라우저에서 클릭 필요)
 
-    API 첫 사용 때 필요한데, GUI에서 클릭하는 방법 외 CLI환경에서 간단하게 처리할지 고민중..
-
-7. 구글 크롬 및 [auto-clicker 확장 프로그램](https://chrome.google.com/webstore/detail/twitch-channel-points-aut/jdpblpklojajpopllbckephjndibljbc) 설치
+7. 구글 크롬 및 채굴을 위한 트위치 자동 클릭 확장 프로그램 설치
 
 
 ## 실행 방법
@@ -83,9 +81,9 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
                 "OUTPUT_DIR": "/home/ubuntu/mnt/Twitch/recordings",
                 # 영상 파일명 규칙
                 "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
-                # 다운로드할 스트리머의 주소
+                # 다운로드할 스트리머의 주소 목록
                 "TARGET_URL": "/home/ubuntu/Documents/github/streamlink-live-download/target_url.txt",
-                # streamlink 실행 파일 경로
+                # streamlink 실행 파일 경로(pip로 install한 경로)
                 "STREAMLINK_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/streamlink",
                 # streamlink 옵션
                 "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
@@ -98,7 +96,11 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
                 # subprocess로 파이썬을 실행하기 위한 python 실행 경로
                 "PYTHON_CMD": "/home/ubuntu/Documents/github/streamlink-live-download/venv/bin/python",
                 # 영상 업로드 실패 시 임시 저장 경로
-                "SAVED_DIR": "/home/ubuntu/mnt/Twitch/recordings/saved"
+                "SAVED_DIR": "/home/ubuntu/mnt/Twitch/recordings/saved",
+                # 업로드 완료된 영상 파일 저장 경로
+                "UPLOADED_DIR": "/home/leeyw/mnt/Twitch/recordings/uploaded",
+                # container로 기동 시 pipe를 통한 chrome 실행 기능 수행 여부
+                "PIPE_FLAG": false
         }
 
 
@@ -113,16 +115,16 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
    - 주의사항 : 'url'만 한 줄씩 입력해야 합니다. 주석처리 없음
 
-3.  python 스크립트 실행
+3.  python 스크립트를 실행한다.
 
         (venv) [UBUNTU-YW] ubuntu@ /home/ubuntu/Documents/github/streamlink-live-download/src # python main.py
 
-4.  로그 확인
+4.  실행 로그를 확인한다.
 
     - 스크립트 실행 로그 : `./logs/pystreamlink.log`
     - streamlink 실행 로그 : `./logs/streamlink_{streamer}.log`
 
-5.  영상 저장 확인
+5.  영상이 정상적으로 저장되는지 확인한다.
 
     - 영상 저장 경로 :
         
@@ -132,25 +134,26 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
     
         [config.json](./config/config.json)에서 `FILE_RULE` 을 변경하여 설정 가능
         
-        - Metadata variables 참고 (https://streamlink.github.io/cli.html#metadata-variables)
+        - Metadata variables [참고](https://streamlink.github.io/cli.html#metadata-variables)
 
 6.  구글 크롬 실행 및 종료 확인
         
     스트리밍이 시작되면 해당 스트리머의 방송 url이 구글 크롬에서 새 창으로 열리며, 스트리밍이 종료되면 자동으로 크롬이 닫힙니다.
 
-7. E-Mail 알림 설정
+7. E-Mail, Slack 알림 설정
 
-    `./config/secrets.json` 파일을 아래와 같이 설정하면 영상 업로드 실패, 파일 시스템 용량 경고와 같은 중요 에러 발생 시 이메일로 해당 내용을 전송
+    `./config/secrets.json` 파일을 아래와 같이 설정하면 영상 업로드 실패, 파일 시스템 용량 경고와 같은 중요 에러 발생 시 이메일 및 Slack으로 해당 내용을 전송
     
     (미설정 시 전송하지 않음)
 
     ```
     {
         "FROM_EMAIL_ADDR": "abc@example.com",
-        "TO_EMAIL_ADDR": "your_email@gmail.com"
+        "TO_EMAIL_ADDR": "your_email@gmail.com",
+        "SLACK_CHANNEL":"slack_channel_name",
+        "SLACK_KEY":"xoxb-1234123412341-123412341234-KdozV41VqaIxcVLqwBgbvcdA"
     }
     ```
-  
 
 ## 이슈
 
@@ -179,3 +182,8 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
     - 1분 뒤 재시도 해도 403 응답이라면 로그 찍고 saved 디렉토리에 저장
     - saved 디렉토리에 저장되어 있는 영상들은 매일 17시에 자동으로 업로드함
         - 여기서도 403 에러 응답을 받으면 1분 뒤 재시도 해보고 그래도 403 이라면 로그 찍고 saved 디렉토리에 그대로 유지 및 다음 날 17시까지 sleep
+
+### Youtube API의 토큰 갱신 한도?
+- Youtube API를 통해 영상을 Upload 하면 약 50회 정도에 한 번씩 웹 브라우저를 통해 토큰을 갱신하는 작업이 필요하다.
+- 따로 구글에 promotion 신청을 하면 한도를 늘려주는 것 같은데 개인적인 프로젝트이므로 신청이 어려워보인다.
+- 로컬에서 실행한다면 웹 브라우저를 통해 사용자가 직접 클릭해주는 방식으로, 컨테이너를 통해 실행한다면 `--noauth_local_webserver` 옵션을 이용해 외부 웹 브라우저에서 인증 후 코드를 Slack 메시지로 전달받아 갱신하는 방식을 사용했다.
