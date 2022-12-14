@@ -4,3 +4,4 @@ logs/*.log
 .gitignore
 __pycache__
 .venv
+recordings
