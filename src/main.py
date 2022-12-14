@@ -743,4 +743,4 @@ if __name__ == '__main__':
     root_logger.critical(f"[SAVED] Init upload saved ... ")
     while True :
         schedule.run_pending()
-        time.sleep(10)
+        time.sleep(1)

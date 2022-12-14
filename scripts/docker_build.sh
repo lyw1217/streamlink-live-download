@@ -10,4 +10,5 @@ if [ $# -lt 2 ] ; then
     exit 0
 fi
 
-$DOCKER build -t $1:$2 ../
+#DOCKER build -t $1:$2 ../
+$DOCKER buildx build --push --platform linux/arm64,linux/amd64 --tag $1:$2 "../"
