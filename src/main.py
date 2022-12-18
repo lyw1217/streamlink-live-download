@@ -413,8 +413,15 @@ def start_streamlink(streamer, url):
                 #i = 0
             i += 1
             #root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
-    
-            author, title = get_stream_info(streamer, url)
+
+            # youtube streaming의 경우 과부하 방지 목적으로 5번에 한 번 조회로 제한
+            if "youtube" in url and i % 5 == 0:
+                author, title = get_stream_info(streamer, url)
+            elif "twitch" in url :
+                author, title = get_stream_info(streamer, url)
+            else :
+                author = ''
+                title = ''
     
             if author != '' and title != '':
                 #executor.submit(start_mining, url=url)
