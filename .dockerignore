@@ -1,7 +1,9 @@
-*.md
-logs/*.log
+logs/*
 .git
 .gitignore
 __pycache__
 .venv
 recordings
+secrets.json
+client_secrets.json
+upload_youtube.py-oauth2.json

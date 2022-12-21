@@ -116,6 +116,8 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'WARN_USAGE = {WARN_USAGE}')
             PIPE_FLAG = configs["PIPE_FLAG"]
             root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
+            MINING_FLAG = configs["MINING_FLAG"]
+            root_logger.critical(f'MINING_FLAG = {MINING_FLAG}')
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()
@@ -226,6 +228,12 @@ else :
             
             PIPE_FLAG = False
             root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
+
+            try :
+                MINING_FLAG = configs['MINING_FLAG']
+            except KeyError :
+                MINING_FLAG = False
+            root_logger.critical(f'MINING_FLAG = {MINING_FLAG}')
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()
@@ -236,29 +244,43 @@ SECRETS_PATH = os.path.join(ROOT_DIR, 'config', 'secrets.json')
 
 FROM_EMAIL_ADDR = ""
 TO_EMAIL_ADDR = ""
-if os.path.isfile(SECRETS_PATH):
-    with open(SECRETS_PATH) as json_file:
-        sec = json.load(json_file)
 
-        root_logger.critical('=== PRIVATE LOADED ===')
-        try :
-            FROM_EMAIL_ADDR = sec['FROM_EMAIL_ADDR']
-            TO_EMAIL_ADDR = sec['TO_EMAIL_ADDR']
-        except KeyError :
-            root_logger.critical(f"No mail Address in {SECRETS_PATH}. Don't send email")
-        try :
-            SLACK_CHANNEL = configs["SLACK_CHANNEL"]
-            root_logger.critical(f'SLACK_CHANNEL = {SLACK_CHANNEL}')
-        except KeyError :
-            SLACK_CHANNEL = "streamlink-alarm"
-        try :
-            SLACK_KEY = sec['SLACK_KEY']
-            root_logger.critical(f'Loaded SLACK_KEY')
-        except KeyError :
-            root_logger.critical(f"No SLACK KEY.")
+IS_CONTAINER = os.getenv("IS_CONTAINER", "")
+# container 인 경우
+if len(IS_CONTAINER) > 0 :
+    root_logger.critical('=== PRIVATE LOADED ===')
+    try :
+        FROM_EMAIL_ADDR = os.getenv("FROM_EMAIL_ADDR", "")
+        root_logger.critical(f'FROM_EMAIL_ADDR = {FROM_EMAIL_ADDR}')
+        TO_EMAIL_ADDR = os.getenv("TO_EMAIL_ADDR", "")
+        root_logger.critical(f'TO_EMAIL_ADDR = {TO_EMAIL_ADDR}')
+        SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "streamlink-alarm")
+        root_logger.critical(f'SLACK_CHANNEL = {SLACK_CHANNEL}')
+        SLACK_KEY = os.getenv("SLACK_KEY", "")
+        root_logger.critical(f'Loaded SLACK_KEY')
+    except Exception as e:
+        root_logger.critical(f"Failed to load Secret Env")
 else :
-    root_logger.critical(f"No {SECRETS_PATH}. Don't send email")
-    
+    if os.path.isfile(SECRETS_PATH):
+        with open(SECRETS_PATH) as json_file:
+            sec = json.load(json_file)
+
+            root_logger.critical('=== PRIVATE LOADED ===')
+            try :
+                FROM_EMAIL_ADDR = sec['FROM_EMAIL_ADDR']
+                TO_EMAIL_ADDR = sec['TO_EMAIL_ADDR']
+            except KeyError :
+                root_logger.critical(f"No mail Address in {SECRETS_PATH}. Don't send email")
+            try :
+                SLACK_CHANNEL = configs["SLACK_CHANNEL"]
+                root_logger.critical(f'SLACK_CHANNEL = {SLACK_CHANNEL}')
+            except KeyError :
+                SLACK_CHANNEL = "streamlink-alarm"
+            try :
+                SLACK_KEY = sec['SLACK_KEY']
+                root_logger.critical(f'Loaded SLACK_KEY')
+            except KeyError :
+                root_logger.critical(f"No SLACK KEY.")
 
 
 ''' Youtube Upload Secrets '''
@@ -266,9 +288,86 @@ CLIENT_SEC_PATH = os.path.join(ROOT_DIR, 'src', 'client_secrets.json')
 OAUTH_PATH = os.path.join(ROOT_DIR, 'src', 'upload_youtube.py-oauth2.json')
 
 if os.path.isfile(CLIENT_SEC_PATH) == False :
-    root_logger.critical(f"No client_secrets.json. check volumn")
-    sys.exit()
+    if len(IS_CONTAINER) > 0 :
+        plain_client_secret = '''
+        {
+            "installed": 
+            {
+                "client_id":"",
+                "project_id":"",
+                "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+                "token_uri":"https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+                "client_secret":"",
+                "redirect_uris":["http://localhost"]
+            }
+        }        
+        '''
+        obj_client_secret = json.loads(plain_client_secret)
+
+        client_id = os.getenv("CLIENT_ID", "")
+        client_secret = os.getenv("CLIENT_SECRET", "")
+        project_id = os.getenv("PROJECT_ID", "")
+        if ( len(client_id) > 0 and len(client_secret) > 0 ) :
+            obj_client_secret["installed"]['client_id'] = client_id
+            obj_client_secret["installed"]['client_secret'] = client_secret
+            obj_client_secret["installed"]['project_id'] = project_id
+            with open(CLIENT_SEC_PATH, 'w', encoding="utf-8") as f:
+                json.dump(obj_client_secret, f, ensure_ascii=False, indent="\t")
+            root_logger.critical(f"Load Client Secret Env")
+        else :
+            root_logger.critical(f"No client secrets. check environment")
+            sys.exit()
+    else :
+        root_logger.critical(f"No client_secrets.json. check volumn")
+        sys.exit()
     
 if os.path.isfile(OAUTH_PATH) == False :
-    root_logger.critical(f"No upload_youtube.py-oauth2.json. check volumn")
-    sys.exit()
+    if len(IS_CONTAINER) > 0 :
+        plain_oauth = '''
+        {
+            "access_token": "",
+            "client_id": "",
+            "client_secret": "",
+            "refresh_token": "",
+            "token_expiry": "2022-11-23T17:14:55Z",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "user_agent": null,
+            "revoke_uri": "https://oauth2.googleapis.com/revoke",
+            "id_token": null,
+            "id_token_jwt": null,
+            "token_response": {
+                "access_token": "",
+                "expires_in": 3599,
+                "scope": "https://www.googleapis.com/auth/youtube.upload",
+                "token_type": "Bearer"
+            },
+            "scopes": [
+                "https://www.googleapis.com/auth/youtube.upload"
+            ],
+            "token_info_uri": "https://oauth2.googleapis.com/tokeninfo",
+            "invalid": true,
+            "_class": "OAuth2Credentials",
+            "_module": "oauth2client.client"
+        }
+        '''
+        obj_oauth = json.loads(plain_oauth)
+
+        access_token = os.getenv("ACCESS_TOKEN", "")
+        client_id = os.getenv("CLIENT_ID", "")
+        client_secret = os.getenv("CLIENT_SECRET", "")
+        refresh_token = os.getenv("REFRESH_TOKEN", "")
+        if ( len(client_id) > 0 and len(client_secret) > 0 ) :
+            obj_oauth['access_token'] = access_token
+            obj_oauth['client_id'] = client_id
+            obj_oauth['client_secret'] = client_secret
+            obj_oauth['refresh_token'] = refresh_token
+            with open(OAUTH_PATH, 'w', encoding="utf-8") as f:
+                json.dump(obj_oauth, f, ensure_ascii=False)
+            root_logger.critical(f"Load upload youtube oauth2 Env")
+        else :
+            root_logger.critical(f"No upload youtube oauth2. check environment")
+            sys.exit()
+    else :
+        root_logger.critical(f"No upload_youtube.py-oauth2.json.")
+        sys.exit()
