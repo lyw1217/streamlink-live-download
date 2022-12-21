@@ -30,7 +30,8 @@ ENV IS_CONTAINER="True" \
 WORKDIR $RUNTIME_DIR
 
 COPY . .
-COPY run.sh ..
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
 
 #RUN pip install --upgrade httplib2 uritemplate pyopenssl WebTest wheel apiclient \
 #	pip install --upgrade oauth2client \
@@ -39,9 +40,9 @@ COPY run.sh ..
 
 RUN pip install -r ./requirements.txt
 
-WORKDIR ..
+WORKDIR /
 RUN tar -cvf app.tar ./app
 RUN mkdir -p /app/logs
 WORKDIR $RUNTIME_DIR
 
-ENTRYPOINT /run.sh -c 2>&1 | tee -a /app/logs/run.log
+ENTRYPOINT ../run.sh -c 2>&1 | tee -a /app/logs/run.log
