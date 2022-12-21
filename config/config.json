@@ -6,12 +6,13 @@
   "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
   "TARGET_URL": "/home/leeyw/Documents/github/streamlink-live-download/target_url.txt",
   "STREAMLINK_CMD": "/home/leeyw/Documents/github/streamlink-live-download/.venv/bin/streamlink",
-  "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
+  "STREAMLINK_OPTIONS": "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns --hls-live-restart",
   "STREAMLINK_LOG_OPTIONS": "info",
   "STREAMLINK_LOG_PATH": "/home/leeyw/Documents/github/streamlink-live-download/logs/streamlink",
   "UPLOAD_YOUTUBE_PY": "/home/leeyw/Documents/github/streamlink-live-download/src/upload_youtube.py",
   "PYTHON_CMD": "/home/leeyw/Documents/github/streamlink-live-download/.venv/bin/python",
   "SAVED_DIR": "/home/leeyw/mnt/Twitch/recordings/saved",
   "UPLOADED_DIR": "/home/leeyw/mnt/Twitch/recordings/uploaded",
-  "PIPE_FLAG": false
+  "PIPE_FLAG": false,
+  "MINING_FLAG": false
 }

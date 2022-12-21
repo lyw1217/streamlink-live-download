@@ -59,10 +59,13 @@ def post_slack_message(s: SlackAPI, text: str):
         try :
             res = s.post_message(s.channel_id, text)
             root_logger.critical("Send Slack Message : " + text)
+            return res
         except Exception as e:
             root_logger.critical(f"Failed Send Slack Message > id : {s.channel_id}, text : {text}, err = {e}")
             res = ""
-    return res
+            return res
+    return ""
+    
 
 def get_slack_last_message(s: SlackAPI):
     if len(s.channel_id) > 0 :
@@ -422,10 +425,11 @@ def start_streamlink(streamer, url):
                 title = ''
     
             if author != '' and title != '':
-                #executor.submit(start_mining, url=url)
-                t1 = threading.Thread(target=start_mining, args=(url,))
-                t1.start()
-                time.sleep(1)
+                if MINING_FLAG == True :
+                    #executor.submit(start_mining, url=url)
+                    t1 = threading.Thread(target=start_mining, args=(url,))
+                    t1.start()
+                    time.sleep(1)
     
                 args = list()
                 opts = list()
@@ -451,10 +455,11 @@ def start_streamlink(streamer, url):
                     root_logger.critical(f"Exception: {e}")
                     root_logger.critical(f"communicate : {outs[0]}")
     
-                #executor.submit(stop_mining, author=author)
-                t2 = threading.Thread(target=stop_mining, args=(author,))
-                t2.start()
-                #time.sleep(5)
+                if MINING_FLAG == True :
+                    #executor.submit(stop_mining, author=author)
+                    t2 = threading.Thread(target=stop_mining, args=(author,))
+                    t2.start()
+                    #time.sleep(5)
     
                 #executor.submit(upload_youtube, author=author, title=title, date=date)
                 t3 = threading.Thread(target=upload_youtube, args=(author, title, date,))
@@ -719,7 +724,7 @@ if __name__ == '__main__':
     root_logger.critical("============================================")
     root_logger.critical("")
     root_logger.critical("       < PYSTREAMLINK >     S T A R T       ")
-    if len(CHROME_CMD) != 0 :
+    if len(CHROME_CMD) != 0  and MINING_FLAG == True :
         root_logger.critical("         mining/upload      written by ywlee")
     elif len(CHROME_CMD) != 0 and PIPE_FLAG == True :
         root_logger.critical("          pipe/upload       written by ywlee")
