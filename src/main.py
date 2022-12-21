@@ -410,12 +410,10 @@ def start_streamlink(streamer, url):
         try:
             if i % 100 == 0 :
                 root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
-                #i = 0
             i += 1
-            #root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
 
-            # youtube streaming의 경우 과부하 방지 목적으로 5번에 한 번 조회로 제한
-            if "youtube" in url and i % 5 == 0:
+            # youtube streaming의 경우 과부하 방지 목적으로 10번에 한 번 조회로 제한
+            if "youtube" in url and i % 10 == 0:
                 author, title = get_stream_info(streamer, url)
             elif "twitch" in url :
                 author, title = get_stream_info(streamer, url)
@@ -485,7 +483,7 @@ def check_stream():
                 continue
 
             # split url (https://www.twitch.tv/)
-            name = url[22:].strip()
+            name = url.split('/')[-1].strip()
             #executor.submit(start_streamlink, streamer=name, url=url)
             t = threading.Thread(target=start_streamlink, args=(name, url,))
             t.start()
