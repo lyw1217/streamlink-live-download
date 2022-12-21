@@ -14,31 +14,32 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
 - Ubuntu 20.04.4 LTS (Focal Fossa)
 - Python 3.8.10
-- Google Chrome 100.0.4896.127
-- streamlink 3.2.0
+- Google Chrome 100.0.4896.127 (최신버전 사용)
+- streamlink 3.2.0 -> 5.1.2 (최신버전 사용)
 
 ## 설치 방법
 
-1.  python 가상환경 구성
+1. python 가상환경 구성
 
         python3 -m venv venv
 
-2.  가상환경 진입
+2. 가상환경 진입
 
         source venv/bin/activate
 
-3.  streamlink 설치
+3. 패키지 설치
         
-        pip install --upgrade streamlink
+        pip install --upgrade streamlink schedule slack_sdk
         
-    - 설치 참고 : https://streamlink.github.io/install.html
+    - streamlink 설치 참고 : https://streamlink.github.io/install.html
+    - python-slack-sdk 설치 참고 : https://slack.dev/python-slack-sdk/
 
-4.  google-api-python-client 사용을 위한 모듈 설치
+4. google-api-python-client 사용을 위한 모듈 설치
 
         # https://github.com/googleapis/google-api-python-client
         pip install httplib2 uritemplate pyopenssl WebTest wheel apiclient 
         pip install --upgrade oauth2client
-        pip install --upgrade google-api-python-client
+        pip install --upgrade google-api-python-client 
 
 5. Google에 애플리케이션 등록 및 OAuth 2.0 사용을 위한 인증 정보 만들기
 
@@ -151,9 +152,60 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
         "FROM_EMAIL_ADDR": "abc@example.com",
         "TO_EMAIL_ADDR": "your_email@gmail.com",
         "SLACK_CHANNEL":"slack_channel_name",
-        "SLACK_KEY":"xoxb-1234123412341-123412341234-KdozV41VqaIxcVLqwBgbvcdA"
+        "SLACK_KEY":"slack_api_key"
     }
     ```
+
+## Docker Container 실행 방법
+
+1. 이미지 pull
+   
+    https://hub.docker.com/r/lyw1217/streamlinkdownload
+
+    ```
+    docker pull lyw1217/streamlinkdownload:latest
+    ```
+
+2. 스크립트에서 볼륨 경로 수정
+
+    호스트 시스템에 맞게 스크립트 내 경로 변수 수정
+
+    ```
+    PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download"
+
+    HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt" # 시스템에 맞게 수정
+    CONTAINER_TARGET_URI="/app/target_url.txt"
+
+    HOST_CONFIG="${PYSTREAM_HOME}/config/config.json" # 시스템에 맞게 수정
+    CONTAINER_CONFIG="/app/config/config.json"
+
+    HOST_LOG_DIR="${PYSTREAM_HOME}/logs" # 시스템에 맞게 수정
+    CONTAINER_LOG_DIR="/app/logs"
+
+    HOST_OUTPUT_DIR="/home/leeyw/mnt/Twitch/recordings" # 시스템에 맞게 수정
+    CONTAINER_OUTPUT_DIR="/mnt/recordings"
+
+    HOST_SAVED_DIR="/home/leeyw/mnt/Twitch/recordings/saved" # 시스템에 맞게 수정
+    CONTAINER_SAVED_DIR="/mnt/recordings/saved"
+
+    HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream" # 시스템에 맞게 수정
+    CONTAINER_PIPE_PATH="/app/fifo-pystream"
+
+    HOST_CLIENT_SEC="${PYSTREAM_HOME}/src/client_secrets.json" # 시스템에 맞게 수정
+    CONTAINER_CLIENT_SEC="/app/src/client_secrets.json"
+
+    HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json" # 시스템에 맞게 수정
+    CONTAINER_OAUTH="/app/src/upload_youtube.py-oauth2.json"
+    ```
+
+3. 스크립트 실행
+
+    streamlink라는 이름의 컨테이너가 생성되며 바로 실행됨
+
+    ```
+    $ ./scripts/docker_run.sh streamlinkdownload lyw1217/streamlinkdownload latest d
+    ```
+
 
 ## 이슈
 
