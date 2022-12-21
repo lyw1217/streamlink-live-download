@@ -1,7 +1,5 @@
 # streamlink 실시간 스트리밍 다운로드 및 유튜브 자동 업로드
 
-__※ 제 환경이 아닌 다른 환경에서의 실사용은 어렵습니다. ※__
-
 ## 개요
 
 __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트리밍 다운로드 및 유튜브 자동 업로드 ]__
@@ -166,11 +164,13 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
     docker pull lyw1217/streamlinkdownload:latest
     ```
 
-2. 스크립트에서 볼륨 경로 수정
+2. `docker_run.sh` 스크립트에서 볼륨 경로 수정
 
     호스트 시스템에 맞게 스크립트 내 경로 변수 수정
 
     ```
+    # docker_run.sh
+    ...
     PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download"
 
     HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt" # 시스템에 맞게 수정
@@ -196,9 +196,31 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
     HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json" # 시스템에 맞게 수정
     CONTAINER_OAUTH="/app/src/upload_youtube.py-oauth2.json"
+    ...
     ```
 
-3. 스크립트 실행
+3. `docker_run.sh` 스크립트에서 컨테이너 환경 변수 수정
+
+    google youtube api, slack 관련 key 및 id 설정
+
+    non-container로 한 번 실행한 뒤 생성된 값을 기준으로 입력
+
+    ```
+    # docker_run.sh
+    ...
+    CLIENT_ID=$CLIENT_ID=""
+    CLIENT_SECRET=$CLIENT_SECRET=""
+    PROJECT_ID=$PROJECT_ID=""
+    ACCESS_TOKEN=$ACCESS_TOKEN=""
+    REFRESH_TOKEN=$REFRESH_TOKEN=""
+    FROM_EMAIL_ADDR=""
+    TO_EMAIL_ADDR=""
+    SLACK_CHANNEL=""
+    SLACK_KEY=""
+    ...
+    ```
+
+4. 스크립트 실행
 
     streamlink라는 이름의 컨테이너가 생성되며 바로 실행됨
 
