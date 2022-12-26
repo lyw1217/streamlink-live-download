@@ -118,6 +118,11 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'PIPE_FLAG = {PIPE_FLAG}')
             MINING_FLAG = configs["MINING_FLAG"]
             root_logger.critical(f'MINING_FLAG = {MINING_FLAG}')
+            command = "which yt-dlp"
+            p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+            YTDLP_CMD = p.communicate()[0].rstrip()
+            if "yt-dlp" not in YTDLP_CMD :
+                root_logger.critical("Err. yt-dlp not installed..")
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()
@@ -234,6 +239,16 @@ else :
             except KeyError :
                 MINING_FLAG = False
             root_logger.critical(f'MINING_FLAG = {MINING_FLAG}')
+
+            try :
+                YTDLP_CMD = configs['YTDLP_CMD']
+            except KeyError :
+                command = "which yt-dlp"
+                p = sp.Popen(command.split(' '), stdout=sp.PIPE, text=True)
+                YTDLP_CMD = p.communicate()[0].rstrip()
+                if "yt-dlp" not in YTDLP_CMD :
+                    root_logger.critical("Err. yt-dlp not installed..")
+            root_logger.critical(f'YTDLP_CMD = {YTDLP_CMD}')
     else :
         root_logger.critical(f"{CONFIG_PATH} is not exist. Configuration file is required.")
         sys.exit()

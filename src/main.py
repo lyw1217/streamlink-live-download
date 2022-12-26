@@ -168,6 +168,43 @@ def stop_mining(author):
     
     return
 
+def get_stream_info_ytdlp(streamer, url):
+    author = ''
+    title = ''
+
+    args = list()
+    opts = list()
+
+    opts.append('-j')
+    opts.append(f'{url}')
+
+    args.append(YTDLP_CMD)
+    args += opts
+
+    pipe = sp.Popen(
+        args, stdout=sp.PIPE
+    )
+    try:
+        text = pipe.communicate(timeout=60)[0]
+    except Exception as e:
+        pipe.kill()
+        root_logger.critical(e)
+        return "",""
+
+    dict = json.loads(text)
+    for key, val in dict.items():
+        if key == 'description':
+            title = val
+        if key == 'uploader':
+            author = val
+        if len(title) > 0 and len(author) > 0:
+            root_logger.critical(f"'{streamer}' is streaming!")
+            root_logger.critical(f"METADATA : author = '{author}'")
+            root_logger.critical(f"METADATA : title  = '{title}'")
+            break
+
+    return author, title
+
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
     author = ''
@@ -195,17 +232,21 @@ def get_stream_info(streamer, url):
         return "",""
 
     dict = json.loads(text)
+    
     for key, val in dict.items():
         if key == 'metadata':
             for k, v in val.items():
                 if v != None:
-                    if k == 'title':
-                        title = v
-                    elif k == 'author':
+                    if k == 'author':
                         author = v
+                    elif k == 'title':
+                        title = v
+            # metadata가 항상 null인 방송은 yt-dlp 적용
+            if len(author) == 0 and len(title) == 0:
+                author, title = get_stream_info_ytdlp(streamer, url)
             break
 
-    if len(title) > 0 and len(author) > 0:
+    if len(author) > 0 and len(title) > 0:
         root_logger.critical(f"'{streamer}' is streaming!")
         root_logger.critical(f"METADATA : author = '{author}'")
         root_logger.critical(f"METADATA : title  = '{title}'")
