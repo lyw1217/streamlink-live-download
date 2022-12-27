@@ -2,7 +2,13 @@
 
 DOCKER=`which docker`
 
-PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download"
+PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download" # 시스템에 맞게 수정
+
+HOST_OUTPUT_DIR="/home/leeyw/mnt/Twitch/recordings" # 시스템에 맞게 수정
+CONTAINER_OUTPUT_DIR="/mnt/recordings"
+
+HOST_SAVED_DIR="/home/leeyw/mnt/Twitch/recordings/saved" # 시스템에 맞게 수정
+CONTAINER_SAVED_DIR="/mnt/recordings/saved"
 
 HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt"
 CONTAINER_TARGET_URI="/app/target_url.txt"
@@ -13,26 +19,20 @@ CONTAINER_CONFIG="/app/config/config.json"
 HOST_LOG_DIR="${PYSTREAM_HOME}/logs"
 CONTAINER_LOG_DIR="/app/logs"
 
-HOST_OUTPUT_DIR="/home/leeyw/mnt/Twitch/recordings"
-CONTAINER_OUTPUT_DIR="/mnt/recordings"
-
-HOST_SAVED_DIR="/home/leeyw/mnt/Twitch/recordings/saved"
-CONTAINER_SAVED_DIR="/mnt/recordings/saved"
-
 HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream"
 CONTAINER_PIPE_PATH="/app/fifo-pystream"
 
-#HOST_CLIENT_SEC="${PYSTREAM_HOME}/src/client_secrets.json"
-#CONTAINER_CLIENT_SEC="/app/src/client_secrets.json"
+HOST_CLIENT_SEC="${PYSTREAM_HOME}/src/client_secrets.json"
+CONTAINER_CLIENT_SEC="/app/src/client_secrets.json"
 
-#HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json"
-#CONTAINER_OAUTH="/app/src/upload_youtube.py-oauth2.json"
+HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json"
+CONTAINER_OAUTH="/app/src/upload_youtube.py-oauth2.json"
 
-CLIENT_ID=$CLIENT_ID=""
-CLIENT_SECRET=$CLIENT_SECRET=""
-PROJECT_ID=$PROJECT_ID=""
-ACCESS_TOKEN=$ACCESS_TOKEN=""
-REFRESH_TOKEN=$REFRESH_TOKEN=""
+CLIENT_ID=""
+CLIENT_SECRET=""
+PROJECT_ID=""
+ACCESS_TOKEN=""
+REFRESH_TOKEN=""
 FROM_EMAIL_ADDR=""
 TO_EMAIL_ADDR=""
 SLACK_CHANNEL=""
@@ -87,4 +87,6 @@ $DOCKER run -$4 --name $CONTAINER_NAME \
 -e PROJECT_ID=$PROJECT_ID \
 -e ACCESS_TOKEN=$ACCESS_TOKEN \
 -e REFRESH_TOKEN=$REFRESH_TOKEN \
+-e SLACK_CHANNEL=$SLACK_CHANNEL \
+-e SLACK_KEY=$SLACK_KEY \
 $IMAGE_NAME:$IMAGE_TAG bash

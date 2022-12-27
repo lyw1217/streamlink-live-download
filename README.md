@@ -156,45 +156,52 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
 ## Docker Container 실행 방법
 
-1. 이미지 pull
+1. 이미지 pull 또는 build image
    
     https://hub.docker.com/r/lyw1217/streamlinkdownload
 
     ```
-    docker pull lyw1217/streamlinkdownload:latest
+    $ docker pull lyw1217/streamlinkdownload:latest
     ```
+
+    또는
+
+    ```
+    $ docker build -t {image_name}:{image_tag} .
+    ``` 
+
 
 2. `docker_run.sh` 스크립트에서 볼륨 경로 수정
 
     호스트 시스템에 맞게 스크립트 내 경로 변수 수정
 
     ```
-    # docker_run.sh
+    # vi docker_run.sh
     ...
-    PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download"
-
-    HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt" # 시스템에 맞게 수정
-    CONTAINER_TARGET_URI="/app/target_url.txt"
-
-    HOST_CONFIG="${PYSTREAM_HOME}/config/config.json" # 시스템에 맞게 수정
-    CONTAINER_CONFIG="/app/config/config.json"
-
-    HOST_LOG_DIR="${PYSTREAM_HOME}/logs" # 시스템에 맞게 수정
-    CONTAINER_LOG_DIR="/app/logs"
-
+    PYSTREAM_HOME="/home/leeyw/Documents/github/streamlink-live-download" # 시스템에 맞게 수정
+    
     HOST_OUTPUT_DIR="/home/leeyw/mnt/Twitch/recordings" # 시스템에 맞게 수정
     CONTAINER_OUTPUT_DIR="/mnt/recordings"
 
     HOST_SAVED_DIR="/home/leeyw/mnt/Twitch/recordings/saved" # 시스템에 맞게 수정
     CONTAINER_SAVED_DIR="/mnt/recordings/saved"
 
-    HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream" # 시스템에 맞게 수정
+    HOST_TARGET_URI="${PYSTREAM_HOME}/target_url.txt" 
+    CONTAINER_TARGET_URI="/app/target_url.txt"
+
+    HOST_CONFIG="${PYSTREAM_HOME}/config/config.json" 
+    CONTAINER_CONFIG="/app/config/config.json"
+
+    HOST_LOG_DIR="${PYSTREAM_HOME}/logs"
+    CONTAINER_LOG_DIR="/app/logs"
+
+    HOST_PIPE_PATH="${PYSTREAM_HOME}/fifo-pystream" 
     CONTAINER_PIPE_PATH="/app/fifo-pystream"
 
-    HOST_CLIENT_SEC="${PYSTREAM_HOME}/src/client_secrets.json" # 시스템에 맞게 수정
+    HOST_CLIENT_SEC="${PYSTREAM_HOME}/src/client_secrets.json" 
     CONTAINER_CLIENT_SEC="/app/src/client_secrets.json"
 
-    HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json" # 시스템에 맞게 수정
+    HOST_OAUTH="${PYSTREAM_HOME}/src/upload_youtube.py-oauth2.json" 
     CONTAINER_OAUTH="/app/src/upload_youtube.py-oauth2.json"
     ...
     ```
@@ -206,13 +213,13 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
     non-container로 한 번 실행한 뒤 생성된 값을 기준으로 입력
 
     ```
-    # docker_run.sh
+    # vi docker_run.sh
     ...
-    CLIENT_ID=$CLIENT_ID=""
-    CLIENT_SECRET=$CLIENT_SECRET=""
-    PROJECT_ID=$PROJECT_ID=""
-    ACCESS_TOKEN=$ACCESS_TOKEN=""
-    REFRESH_TOKEN=$REFRESH_TOKEN=""
+    CLIENT_ID=""
+    CLIENT_SECRET=""
+    PROJECT_ID=""
+    ACCESS_TOKEN=""
+    REFRESH_TOKEN=""
     FROM_EMAIL_ADDR=""
     TO_EMAIL_ADDR=""
     SLACK_CHANNEL=""
@@ -222,10 +229,10 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 
 4. 스크립트 실행
 
-    streamlink라는 이름의 컨테이너가 생성되며 바로 실행됨
+    streamlinkdownload 라는 이름의 컨테이너가 생성되며 바로 실행됨
 
     ```
-    $ ./scripts/docker_run.sh streamlinkdownload lyw1217/streamlinkdownload latest d
+    $ ./scripts/docker_run.sh streamlinkdownload {image_name} {image_tag} d
     ```
 
 
