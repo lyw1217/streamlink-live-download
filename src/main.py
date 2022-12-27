@@ -198,9 +198,9 @@ def get_stream_info_ytdlp(streamer, url):
         if key == 'uploader':
             author = val
         if len(title) > 0 and len(author) > 0:
-            root_logger.critical(f"'{streamer}' is streaming!")
-            root_logger.critical(f"METADATA : author = '{author}'")
-            root_logger.critical(f"METADATA : title  = '{title}'")
+            root_logger.critical(f"'{streamer}' is streaming! - using yt-dlp")
+            root_logger.critical(f"DESCRIPTION : author = '{author}'")
+            root_logger.critical(f"UPLOADER : title  = '{title}'")
             break
 
     return author, title
@@ -476,7 +476,8 @@ def start_streamlink(streamer, url):
                 opts = list()
     
                 opts.append('--output')
-                opts.append(f'{OUTPUT_DIR}/{FILE_RULE}')
+                title = title.replace("<", " ").replace(">", " ") # escape <, >
+                opts.append(f'{OUTPUT_DIR}/{f"[{author}]_{{time:%Y-%m-%d-%H%M%S}}_{title}.ts"}')
                 opts += f'{STREAMLINK_OPTIONS}'.split(' ')
                 opts.append('--loglevel')
                 opts.append(f'{STREAMLINK_LOG_OPTIONS}')
