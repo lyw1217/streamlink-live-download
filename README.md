@@ -249,6 +249,11 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
     - title, author 가 조회되면 영상 다운로드를 시작하는 방식으로 변경(초반 10초정도는 다운로드하지 못함)
     - 이렇게 하지 않으면 유투브 자동 업로드가 어려워짐..
 
+> - `yt-dlp`를 이용해서 metadata를 추가적으로 조회할 수 있게 변경
+> - FILE_RULE에 `streamlink`의 metadata를 직접 사용하지 않고, json으로 조회된 metadata를 변수로 받아서 사용하도록 변경   
+> --> title, author가 조회되기까지 기다리는 시간 단축   
+> --> streamlink에서 metadata가 방송 내내 null인 경우에는 yt-dlp에서 조회하여 처리
+
 ### YouTube Data API v3의 quota(할당량)
 - 일일 요청 한도는 10,000, 1분 요청 한도는 1,600 
 - 유튜브 업로드(insert)의 비용은 1,600(https://developers.google.com/youtube/v3/determine_quota_cost?hl=ko)
@@ -267,4 +272,6 @@ __[ [streamlink](https://github.com/streamlink/streamlink)를 이용한 스트�
 ### Youtube API의 토큰 갱신 한도?
 - Youtube API를 통해 영상을 Upload 하면 약 50회 정도에 한 번씩 웹 브라우저를 통해 토큰을 갱신하는 작업이 필요하다.
 - 따로 구글에 promotion 신청을 하면 한도를 늘려주는 것 같은데 개인적인 프로젝트이므로 신청이 어려워보인다.
-- 로컬에서 실행한다면 웹 브라우저를 통해 사용자가 직접 클릭해주는 방식으로, 컨테이너를 통해 실행한다면 `--noauth_local_webserver` 옵션을 이용해 외부 웹 브라우저에서 인증 후 코드를 Slack 메시지로 전달받아 갱신하는 방식을 사용했다.
+- GUI에서 실행한다면 웹 브라우저를 통해 사용자가 직접 클릭해주는 방식으로, CLI를 통해 실행한다면 `--noauth_local_webserver` 옵션을 이용해 외부 웹 브라우저에서 인증 후 코드를 입력해주면 토큰이 갱신된다.
+> - 토큰 갱신이 필요한 상황(약 50회 업로드 이후)이 발생하면 `--noauth_local_webserver` 옵션 으로 인해 토큰 갱신 링크를 stdout으로 뿌려주는데, 그 링크를 Slack 메시지로 사용자에게 전달한다.
+> - 그럼 사용자는 웹 브라우저를 통해 승인 코드를 발급받아 Slack 메시지로 응답하면 토큰이 갱신된다.
