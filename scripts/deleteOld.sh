@@ -30,7 +30,6 @@ delete_old() {
             echo "rm -f '${arg}'"
             rm -f "${arg}"
         fi
-        echo "${arg}"
     done
 }
 
