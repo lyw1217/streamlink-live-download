@@ -10,25 +10,27 @@ if [ ! -d ${VIDEO_PATH} ]; then
 fi
 
 delete_old() {
-	for arg in "$1"/*
-	do
-		if [ ! -e "$arg" ]; then
-			echo "File "$arg" is not exists."
-			continue
-		fi
+    for arg in "$1"/*
+    do
+        if [ ! -e "${arg}" ]; then
+            echo "File '"${arg}"' is not exists."
+            continue
+        fi
 
-		if [ -d "$arg" ]; then
-			echo "directory ${arg}"
-			delete_old $arg
-			continue
-		fi
+        if [ -d "${arg}" ]; then
+            echo "directory '${arg}'"
+            delete_old ${arg}
+            continue
+        fi
 
-        time_close=`stat -c %Y $arg`
+        time_close=`stat -c %Y "${arg}"`
         time_now=`date +%s`
         time_diff=`expr $time_now - $time_close`
         if [ $time_diff -gt $PERIOD ]; then
-            rm -f $arg
+            echo "rm -f '${arg}'"
+            rm -f "${arg}"
         fi
+        echo "${arg}"
     done
 }
 
