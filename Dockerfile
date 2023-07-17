@@ -38,6 +38,7 @@ RUN chmod +x /run.sh
 #	pip install --upgrade google-api-python-client \
 #	pip install --upgrade streamlink
 
+RUN pip install --upgrade pip
 RUN pip install -r ./requirements.txt
 
 WORKDIR /
