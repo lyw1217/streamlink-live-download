@@ -92,6 +92,8 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
             STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
             root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
+            TWITCH_OPTIONS = configs['TWITCH_OPTIONS']
+            root_logger.critical(f'TWITCH_OPTIONS = {TWITCH_OPTIONS}')
             STREAMLINK_LOG_OPTIONS = configs['STREAMLINK_LOG_OPTIONS']
             root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
             STREAMLINK_LOG_PATH = os.path.join(ROOT_DIR, "logs/streamlink")
@@ -188,6 +190,12 @@ else :
             root_logger.critical(f'STREAMLINK_CMD = {STREAMLINK_CMD}')
 
             try :
+                TWITCH_OPTIONS = configs['TWITCH_OPTIONS']
+            except KeyError :
+                TWITCH_OPTIONS = "--twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
+            root_logger.critical(f'TWITCH_OPTIONS = {TWITCH_OPTIONS}')
+
+            try :
                 STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
             except KeyError :
                 STREAMLINK_OPTIONS = "--force --twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
@@ -273,6 +281,9 @@ if len(IS_CONTAINER) > 0 :
         root_logger.critical(f'SLACK_CHANNEL = {SLACK_CHANNEL}')
         SLACK_KEY = os.getenv("SLACK_KEY", "")
         root_logger.critical(f'Loaded SLACK_KEY')
+        AFREECA_ID = os.getenv("AFREECA_ID", "")
+        AFREECA_PW = os.getenv("AFREECA_PW", "")
+        root_logger.critical(f'Loaded AFREECA')
     except Exception as e:
         root_logger.critical(f"Failed to load Secret Env")
 else :
@@ -296,6 +307,16 @@ else :
                 root_logger.critical(f'Loaded SLACK_KEY')
             except KeyError :
                 root_logger.critical(f"No SLACK KEY.")
+            try :
+                AFREECA_ID = sec['AFREECA_ID']
+                root_logger.critical(f'Loaded AFREECA_ID')
+            except KeyError :
+                root_logger.critical(f"No AFREECA ID.")
+            try :
+                AFREECA_PW = sec['AFREECA_PW']
+                root_logger.critical(f'Loaded AFREECA_PW')
+            except KeyError :
+                root_logger.critical(f"No AFREECA PW.")
 
 
 ''' Youtube Upload Secrets '''

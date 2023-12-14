@@ -193,9 +193,11 @@ def get_stream_info_ytdlp(streamer, url):
 
     dict = json.loads(text)
     for key, val in dict.items():
-        if key == 'description':
+        if key == 'description' and 'twitch' in url:
             title = val
-        if key == 'uploader':
+        elif key == 'fulltitle' and 'afreecatv' in url:
+            title = val
+        elif key == 'uploader':
             author = val
         if len(title) > 0 and len(author) > 0:
             root_logger.critical(f"'{streamer}' is streaming! - using yt-dlp")
@@ -214,7 +216,10 @@ def get_stream_info(streamer, url):
     opts = list()
 
     opts.append('--json')
-    opts += f'{STREAMLINK_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
+    if "twitch" in url :
+        opts += f'{STREAMLINK_OPTIONS} {TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
+    else :
+        opts += f'{STREAMLINK_OPTIONS}'.split(' ')
     opts.append(f'{url}')
 
     args.append(STREAMLINK_CMD)
@@ -459,7 +464,7 @@ def start_streamlink(streamer, url):
             # youtube streaming의 경우 과부하 방지 목적으로 10번에 한 번 조회로 제한
             if "youtube" in url and i % 10 == 0:
                 author, title = get_stream_info(streamer, url)
-            elif "twitch" in url :
+            elif "twitch" in url or "afreecatv" in url :
                 author, title = get_stream_info(streamer, url)
             else :
                 author = ''
