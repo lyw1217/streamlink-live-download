@@ -1,5 +1,5 @@
 {
-  "INTERVAL": 10,
+  "INTERVAL": 30,
   "WARN_USAGE": 70,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/leeyw/mnt/Twitch/recordings",
@@ -7,7 +7,7 @@
   "TARGET_URL": "/home/leeyw/Documents/github/streamlink-live-download/target_url.txt",
   "STREAMLINK_CMD": "/home/leeyw/Documents/github/streamlink-live-download/.venv/bin/streamlink",
   "STREAMLINK_OPTIONS": "--force --hls-live-restart",
-  "TWITCH_OPTIONS": "--twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns",
+  "TWITCH_OPTIONS": "--twitch-disable-hosting --twitch-disable-ads",
   "STREAMLINK_LOG_OPTIONS": "info",
   "STREAMLINK_LOG_PATH": "/home/leeyw/Documents/github/streamlink-live-download/logs/streamlink",
   "UPLOAD_YOUTUBE_PY": "/home/leeyw/Documents/github/streamlink-live-download/src/upload_youtube.py",
