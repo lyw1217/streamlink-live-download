@@ -464,7 +464,7 @@ def start_streamlink(streamer, url):
             # youtube streaming의 경우 과부하 방지 목적으로 10번에 한 번 조회로 제한
             if "youtube" in url and i % 10 == 0:
                 author, title = get_stream_info(streamer, url)
-            elif "twitch" in url or "afreecatv" in url :
+            elif "twitch" in url or "afreecatv" in url or "chzzk" in url :
                 author, title = get_stream_info(streamer, url)
             else :
                 author = ''
