@@ -461,14 +461,14 @@ def start_streamlink(streamer, url):
                 root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
             i += 1
 
-            # youtube streaming의 경우 과부하 방지 목적으로 10번에 한 번 조회로 제한
-            if "youtube" in url and i % 10 == 0:
+            # youtube streaming의 경우, 과부하 방지 목적으로 5번에 한 번 조회로 제한
+            if "youtube" in url and i % 5 == 0:
                 author, title = get_stream_info(streamer, url)
-            elif "twitch" in url or "afreecatv" in url or "chzzk" in url :
+            elif len(url) > 0 :
                 author, title = get_stream_info(streamer, url)
             else :
-                author = ''
-                title = ''
+                root_logger.critical(f"url 오류. streamer='{streamer}', url='{url}'")
+                break
     
             if author != '' and title != '':
                 if MINING_FLAG == True :
