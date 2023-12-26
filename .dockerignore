@@ -7,3 +7,4 @@ recordings
 secrets.json
 client_secrets.json
 upload_youtube.py-oauth2.json
+test.sh

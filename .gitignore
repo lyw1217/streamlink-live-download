@@ -201,3 +201,5 @@ logs/*
 fifo-pystream
 
 .DS_Store
+
+test.sh
