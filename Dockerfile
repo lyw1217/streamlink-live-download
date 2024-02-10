@@ -46,6 +46,6 @@ RUN tar -cvf app.tar --exclude ./app/config/secrets.json ./app
 RUN mkdir -p /app/logs
 WORKDIR $RUNTIME_DIR
 
-RUN cp ./src/plugins/chzzk.py /usr/local/lib/python3.8/site-packages/streamlink/plugins
+RUN cp ./src/plugins/chzzk.py /usr/local/lib/python3.9/site-packages/streamlink/plugins
 
 ENTRYPOINT ../run.sh -c 2>&1 | tee -a /app/logs/run.log
