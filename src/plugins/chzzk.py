@@ -25,9 +25,9 @@ log = logging.getLogger(__name__)
     pattern=re.compile(r"https?://chzzk\.naver\.com/video/(?P<video_id>[^/?]+)"),
 )
 class Chzzk(Plugin):
-    _API_CHANNELS_LIVE_DETAIL = "https://api.chzzk.naver.com/service/v1/channels/{channel_id}/live-detail"
-    _API_VIDEOS = "https://api.chzzk.naver.com/service/v1/videos/{video_id}"
-    _API_VOD_PLAYBACK_URL = "https://apis.naver.com/neonplayer/vodplay/v1/playback/{video_id}?key={in_key}"
+    _API_CHANNELS_LIVE_DETAIL = "https://api.chzzk.naver.com/service/v2/channels/{channel_id}/live-detail"
+    _API_VIDEOS = "https://api.chzzk.naver.com/service/v2/videos/{video_id}"
+    _API_VOD_PLAYBACK_URL = "https://apis.naver.com/neonplayer/vodplay/v2/playback/{video_id}?key={in_key}"
 
     def _query_api(self, url, *schemas):
         return self.session.http.get(
