@@ -218,6 +218,8 @@ def get_stream_info(streamer, url):
     opts.append('--json')
     if "twitch" in url :
         opts += f'{STREAMLINK_OPTIONS} {TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
+    elif "youtube" in url :
+        opt += f'{STREAMLINK_OPTIONS} {YOUTUBE_OPTIONS}'.split(' ')  # --stream-types hls 옵션이 없으면 라이브 아닌 일반 영상을 저장함
     else :
         opts += f'{STREAMLINK_OPTIONS}'.split(' ')
     opts.append(f'{url}')
@@ -461,8 +463,8 @@ def start_streamlink(streamer, url):
                 root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
             i += 1
 
-            # youtube streaming의 경우, 과부하 방지 목적으로 5번에 한 번 조회로 제한
-            if "youtube" in url and i % 5 == 0:
+            # youtube streaming의 경우, 과부하 방지 목적으로 3번에 한 번 조회로 제한
+            if "youtube" in url and i % 3 == 0:
                 author, title = get_stream_info(streamer, url)
             elif len(url) > 0 :
                 author, title = get_stream_info(streamer, url)

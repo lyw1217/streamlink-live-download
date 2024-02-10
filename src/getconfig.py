@@ -94,6 +94,8 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'STREAMLINK_OPTIONS = {STREAMLINK_OPTIONS}')
             TWITCH_OPTIONS = configs['TWITCH_OPTIONS']
             root_logger.critical(f'TWITCH_OPTIONS = {TWITCH_OPTIONS}')
+            YOUTUBE_OPTIONS = configs['YOUTUBE_OPTIONS']
+            root_logger.critical(f'YOUTUBE_OPTIONS = {YOUTUBE_OPTIONS}')
             STREAMLINK_LOG_OPTIONS = configs['STREAMLINK_LOG_OPTIONS']
             root_logger.critical(f'STREAMLINK_LOG_OPTIONS = {STREAMLINK_LOG_OPTIONS}')
             STREAMLINK_LOG_PATH = os.path.join(ROOT_DIR, "logs/streamlink")
@@ -194,6 +196,12 @@ else :
             except KeyError :
                 TWITCH_OPTIONS = "--twitch-disable-hosting --twitch-disable-ads --twitch-disable-reruns"
             root_logger.critical(f'TWITCH_OPTIONS = {TWITCH_OPTIONS}')
+
+            try :
+                YOUTUBE_OPTIONS = configs['YOUTUBE_OPTIONS']
+            except KeyError :
+                YOUTUBE_OPTIONS = "--stream-types hls"
+            root_logger.critical(f'YOUTUBE_OPTIONS = {YOUTUBE_OPTIONS}')
 
             try :
                 STREAMLINK_OPTIONS = configs['STREAMLINK_OPTIONS']
