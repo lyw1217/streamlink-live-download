@@ -1,5 +1,5 @@
 {
-  "INTERVAL": 30,
+  "INTERVAL": 20,
   "WARN_USAGE": 70,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/leeyw/mnt/Twitch/recordings",
