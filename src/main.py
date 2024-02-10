@@ -461,11 +461,11 @@ def start_streamlink(streamer, url):
         try:
             if i % 100 == 0 :
                 root_logger.critical(f"{datetime.datetime.now()} Get streaming information... > '{streamer}', i={i}")
-            i += 1
 
-            # youtube streaming의 경우, 과부하 방지 목적으로 3번에 한 번 조회로 제한
-            if "youtube" in url and i % 3 == 0:
-                author, title = get_stream_info(streamer, url)
+            if "youtube" in url :
+                # youtube streaming의 경우, 과부하 방지 목적으로 3번에 한 번 조회로 제한
+                if i % 3 == 0 :
+                    author, title = get_stream_info(streamer, url)
             elif len(url) > 0 :
                 author, title = get_stream_info(streamer, url)
             else :
@@ -518,6 +518,7 @@ def start_streamlink(streamer, url):
             author = ''
             title = ''
             time.sleep(INTERVAL)
+            i += 1
 
         except Exception as e:
             root_logger.critical(f"Exception: {e}")
