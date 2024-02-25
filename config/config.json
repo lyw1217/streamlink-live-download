@@ -3,7 +3,7 @@
   "WARN_USAGE": 70,
   "QUALITY": "best",
   "OUTPUT_DIR": "/home/leeyw/mnt/Twitch/recordings",
-  "FILE_RULE": "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts",
+  "FILE_RULE": "{time:%Y-%m-%d-%H%M%S}_[{author}]_{title}.ts",
   "TARGET_URL": "/home/leeyw/Documents/github/streamlink-live-download/target_url.txt",
   "STREAMLINK_CMD": "/home/leeyw/Documents/github/streamlink-live-download/.venv/bin/streamlink",
   "STREAMLINK_OPTIONS": "--force --hls-live-restart",
