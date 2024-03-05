@@ -483,11 +483,18 @@ def start_streamlink(streamer, url):
     
                 args = list()
                 opts = list()
-    
+
                 opts.append('--output')
                 title = title.replace("<", " ").replace(">", " ").replace("/", "-") # escape <, >, /
                 opts.append(f'{OUTPUT_DIR}/{f"{FILE_RULE}"}')
-                opts += f'{STREAMLINK_OPTIONS}'.split(' ')
+                if "twitch" in url :
+                    opts += f'{STREAMLINK_OPTIONS} {TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
+                elif "youtube" in url :
+                    opts += f'{STREAMLINK_OPTIONS} {YOUTUBE_OPTIONS}'.split(' ')  # --stream-types hls 옵션이 없으면 라이브 아닌 일반 영상을 저장함
+                elif "afreeca" in url :
+                    opts += f'{STREAMLINK_OPTIONS} {AFREECA_OPTIONS} {AFREECA_ID} {AFREECA_PW}'.split(' ')  # --afreeca-purge-credentials 옵션으로 세션 및 인증정보 초기화
+                else :
+                    opts += f'{STREAMLINK_OPTIONS}'.split(' ')
                 opts.append('--loglevel')
                 opts.append(f'{STREAMLINK_LOG_OPTIONS}')
                 opts.append('--logfile')
