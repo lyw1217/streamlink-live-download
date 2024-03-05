@@ -79,7 +79,7 @@ if len(IS_CONTAINER) > 0 :
             root_logger.critical(f'QUALITY = {QUALITY}')
             OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/mnt/recordings")
             root_logger.critical(f'OUTPUT_DIR = {OUTPUT_DIR}')
-            FILE_RULE = "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
+            FILE_RULE = "{time:%Y-%m-%d-%H%M%S}_[{author}]_{title}.ts"
             root_logger.critical(f'FILE_RULE = {FILE_RULE}')
             TARGET_URL = os.path.join(ROOT_DIR, "target_url.txt")
             root_logger.critical(f'TARGET_URL = {TARGET_URL}')
@@ -173,7 +173,7 @@ else :
             try :
                 FILE_RULE = configs['FILE_RULE']
             except KeyError :
-                FILE_RULE = "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
+                FILE_RULE = "{time:%Y-%m-%d-%H%M%S}_[{author}]_{title}.ts"
             root_logger.critical(f'FILE_RULE = {FILE_RULE}')
 
             try :

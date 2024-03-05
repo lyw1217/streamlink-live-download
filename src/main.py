@@ -486,7 +486,7 @@ def start_streamlink(streamer, url):
     
                 opts.append('--output')
                 title = title.replace("<", " ").replace(">", " ").replace("/", "-") # escape <, >, /
-                opts.append(f'{OUTPUT_DIR}/{f"[{author}]_{{time:%Y-%m-%d-%H%M%S}}_{title}.ts"}')
+                opts.append(f'{OUTPUT_DIR}/{f"{FILE_RULE}"}')
                 opts += f'{STREAMLINK_OPTIONS}'.split(' ')
                 opts.append('--loglevel')
                 opts.append(f'{STREAMLINK_LOG_OPTIONS}')
