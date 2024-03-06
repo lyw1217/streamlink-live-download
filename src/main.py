@@ -207,23 +207,29 @@ def get_stream_info_ytdlp(streamer, url):
 
     return author, title
 
+def setup_opts(url):
+    common_options = f'{STREAMLINK_OPTIONS}'.split(' ')
+    opts = common_options
+
+    if "twitch" in url:
+        opts += f'{TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
+    elif "youtube" in url:
+        opts += f'{YOUTUBE_OPTIONS}'.split(' ')  # --stream-types hls 옵션이 없으면 라이브 아닌 일반 영상을 저장함
+    elif "afreeca" in url:
+        afreeca_options = f'{AFREECA_OPTIONS} {AFREECA_ID} {AFREECA_PW}'.split(' ')
+        opts += afreeca_options  # --afreeca-purge-credentials 옵션으로 세션 및 인증정보 초기화
+
+    return opts
+
 # 스트리밍 중이라면 author metadata 반환, 아니면 '' 반환
 def get_stream_info(streamer, url):
     author = ''
     title = ''
 
     args = list()
-    opts = list()
 
+    opts = setup_opts(url)
     opts.append('--json')
-    if "twitch" in url :
-        opts += f'{STREAMLINK_OPTIONS} {TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
-    elif "youtube" in url :
-        opts += f'{STREAMLINK_OPTIONS} {YOUTUBE_OPTIONS}'.split(' ')  # --stream-types hls 옵션이 없으면 라이브 아닌 일반 영상을 저장함
-    elif "afreeca" in url :
-        opts += f'{STREAMLINK_OPTIONS} {AFREECA_OPTIONS} {AFREECA_ID} {AFREECA_PW}'.split(' ')  # --afreeca-purge-credentials 옵션으로 세션 및 인증정보 초기화
-    else :
-        opts += f'{STREAMLINK_OPTIONS}'.split(' ')
     opts.append(f'{url}')
 
     args.append(STREAMLINK_CMD)
@@ -482,19 +488,11 @@ def start_streamlink(streamer, url):
                     time.sleep(1)
     
                 args = list()
-                opts = list()
 
+                opts = setup_opts(url)
                 opts.append('--output')
                 title = title.replace("<", " ").replace(">", " ").replace("/", "-") # escape <, >, /
                 opts.append(f'{OUTPUT_DIR}/{f"{FILE_RULE}"}')
-                if "twitch" in url :
-                    opts += f'{STREAMLINK_OPTIONS} {TWITCH_OPTIONS}'.split(' ')  # --twitch-disable-hosting 옵션이 없으면 호스팅 시 metadata mismatch 발생
-                elif "youtube" in url :
-                    opts += f'{STREAMLINK_OPTIONS} {YOUTUBE_OPTIONS}'.split(' ')  # --stream-types hls 옵션이 없으면 라이브 아닌 일반 영상을 저장함
-                elif "afreeca" in url :
-                    opts += f'{STREAMLINK_OPTIONS} {AFREECA_OPTIONS} {AFREECA_ID} {AFREECA_PW}'.split(' ')  # --afreeca-purge-credentials 옵션으로 세션 및 인증정보 초기화
-                else :
-                    opts += f'{STREAMLINK_OPTIONS}'.split(' ')
                 opts.append('--loglevel')
                 opts.append(f'{STREAMLINK_LOG_OPTIONS}')
                 opts.append('--logfile')
@@ -507,6 +505,7 @@ def start_streamlink(streamer, url):
                 
                 date = datetime.datetime.now()
                 try:
+                    root_logger.critical(f"args = {args}")
                     ps = sp.call(args)
                 except Exception as e:
                     outs = ps.communicate()
