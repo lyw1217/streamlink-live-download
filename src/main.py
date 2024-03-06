@@ -400,8 +400,8 @@ def upload_youtube(author, title, date):
             l_plus_date = [date+datetime.timedelta(seconds=i) for i in range(15)]
             l_minus_date = [date-datetime.timedelta(seconds=i) for i in range(5)]
 
-            # file name format : "[{author}]_{time:%Y-%m-%d-%H%M%S}_{title}.ts"
-            file_date = datetime.datetime.strptime(name.split(']')[1][1:18], "%Y-%m-%d-%H%M%S")
+            # file name format : "{time:%Y-%m-%d-%H%M%S}_[{author}]_{title}.ts"
+            file_date = datetime.datetime.strptime(name.split('_')[0][1:18], "%Y-%m-%d-%H%M%S")
 
             root, ext = os.path.splitext(name)
 
@@ -517,10 +517,12 @@ def start_streamlink(streamer, url):
                     t2 = threading.Thread(target=stop_mining, args=(author,))
                     t2.start()
                     #time.sleep(5)
-    
+                
+                time.sleep(5)
                 #executor.submit(upload_youtube, author=author, title=title, date=date)
                 t3 = threading.Thread(target=upload_youtube, args=(author, title, date,))
                 t3.start()
+                time.sleep(5) # 스트리밍 종료 후 몇 개 세그먼트가 재녹화 되는 현상 보완
                 i = 0
     
             author = ''
