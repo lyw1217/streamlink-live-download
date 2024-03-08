@@ -401,7 +401,7 @@ def upload_youtube(author, title, date):
             l_minus_date = [date-datetime.timedelta(seconds=i) for i in range(5)]
 
             # file name format : "{time:%Y-%m-%d-%H%M%S}_[{author}]_{title}.ts"
-            file_date = datetime.datetime.strptime(name.split('_')[0][1:18], "%Y-%m-%d-%H%M%S")
+            file_date = datetime.datetime.strptime(name.split('_')[0][0:18], "%Y-%m-%d-%H%M%S")
 
             root, ext = os.path.splitext(name)
 
