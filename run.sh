@@ -7,13 +7,19 @@ while (( "$#" )); do
 			echo "cd /"
 			cd /
 			URL=/app/target_url.txt
-			SRC=/app/src/main.py
-			if [ -f "$URL" ] && [ -f "$SRC" ]; then  
-				echo "$URL, $SRC exist "
-			else
-				echo "/bin/tar -xvf ./app.tar"
-				/bin/tar -xvf ./app.tar
+			#SRC=/app/src/main.py
+			#if [ -f "$URL" ] && [ -f "$SRC" ]; then  
+			#	echo "$URL, $SRC exist "
+			#else
+			#	echo "/bin/tar -xvf ./app.tar"
+			#	/bin/tar -xvf ./app.tar
+			#fi
+			if [ -f "$URL" ]; then  
+				echo "$URL exist"
+				/bin/cp $URL ${URL}_bk
 			fi
+			echo "/bin/tar -xvf ./app.tar"
+			/bin/tar -xvf ./app.tar
 			
 			echo "cd /app"
 			cd /app
