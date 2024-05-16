@@ -42,7 +42,7 @@ RUN pip install --upgrade pip
 RUN pip install -r ./requirements.txt
 
 WORKDIR /
-RUN tar -cvf app.tar --exclude ./app/config/secrets.json ./app
+RUN tar -cvf app.tar --exclude ./app/config/secrets.json --exclude ./app/src/upload_youtube.py-oauth2.json ./app
 RUN mkdir -p /app/logs
 WORKDIR $RUNTIME_DIR
 

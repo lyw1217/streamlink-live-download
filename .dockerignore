@@ -4,7 +4,7 @@ logs/*
 __pycache__
 .venv
 recordings
-secrets.json
-client_secrets.json
-upload_youtube.py-oauth2.json
+./config/secrets.json
+./src/client_secrets.json
+./src/upload_youtube.py-oauth2.json
 test*
