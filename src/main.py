@@ -352,15 +352,16 @@ def cmd_youtube_api(dir:str, name:str) :
     
     return ""
 
-def success_upload(flag:str=""):
+def success_upload(flag:str="", name:str=""):
     root_logger.critical(f"{flag}Success upload youtube.")
     # 업로드 성공 시 파일 삭제
     #root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
     #os.remove(f"{OUTPUT_DIR}/{name}")
-
+    
     # 업로드 성공 시 파일 이동
     os.replace(f"{OUTPUT_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
     
+    global upload_count
     upload_count += 1
     root_logger.critical(f"upload count = {upload_count}")
     with open(f"{UPLOADED_DIR}/upload_count.txt", "w") as f:
@@ -375,7 +376,7 @@ def start_upload(author, name):
     out = cmd_youtube_api(OUTPUT_DIR, name)
 
     if check_quota(out) :
-        success_upload()
+        success_upload("", name)
     else :
         root_logger.critical(f"Err. Failed upload youtube, Wait 60 seconds and Retry")
         # 1분 제한 회피
@@ -385,7 +386,7 @@ def start_upload(author, name):
         out = cmd_youtube_api(OUTPUT_DIR, name)
 
         if check_quota(out) :
-            success_upload("RETRY ")
+            success_upload("RETRY ", name)
         else :
             # 재시도 실패 시 임시 저장
             root_logger.critical(f"RETRY Err. Failed upload youtube. Replace file")
@@ -575,7 +576,7 @@ def upload_saved() :
             out = cmd_youtube_api(SAVED_DIR, name)
 
             if check_quota(out) :
-                success_upload("[SAVED] ")
+                success_upload("[SAVED] ", name)
             else :
                 root_logger.critical(f"[SAVED] Err. Failed upload youtube, Wait 60 seconds and Retry")
                 # 1분 제한 회피
@@ -584,7 +585,7 @@ def upload_saved() :
                 out = cmd_youtube_api(SAVED_DIR, name)
 
                 if check_quota(out) :
-                    success_upload("[SAVED] RETRY ")
+                    success_upload("[SAVED] RETRY ", name)
                 else :
                     # 재시도 실패 시 로깅
                     root_logger.critical(f"[SAVED] RETRY Err. Failed upload youtube... CHECK QUOTA and FREE SPACE")
