@@ -353,7 +353,7 @@ def cmd_youtube_api(dir:str, name:str) :
     return ""
 
 def success_upload(flag:str=""):
-    root_logger.critical(f"{str}Success upload youtube.")
+    root_logger.critical(f"{flag}Success upload youtube.")
     # 업로드 성공 시 파일 삭제
     #root_logger.critical(f"Remove {OUTPUT_DIR}/{name}")
     #os.remove(f"{OUTPUT_DIR}/{name}")
@@ -362,6 +362,7 @@ def success_upload(flag:str=""):
     os.replace(f"{OUTPUT_DIR}/{name}", f"{UPLOADED_DIR}/{name}")
     
     upload_count += 1
+    root_logger.critical(f"upload count = {upload_count}")
     with open(f"{UPLOADED_DIR}/upload_count.txt", "w") as f:
         f.write(f"{upload_count}")
 
